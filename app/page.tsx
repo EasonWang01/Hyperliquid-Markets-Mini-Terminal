@@ -63,30 +63,28 @@ export default function Home() {
     <main className="min-h-screen bg-gray-900">
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowMarketSelector(true)}
-                className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors"
-              >
-                <Menu className="w-4 h-4 text-gray-300" />
-                <span className="text-white font-semibold">
-                  {selectedMarket ? selectedMarket.coin : 'Select Market'}
-                </span>
-              </button>
-            </div>
 
-            <div className="flex items-center gap-3">
-              {/* Account Button */}
-              <button
-                onClick={() => setShowAccountLookup(true)}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Account Lookup"
-              >
-                <User className="w-4 h-4 text-gray-300" />
-              </button>
-            </div>
+        {/* Token Select Control */}
+        <div className="px-4 pb-4">
+          <div className="max-w-sm">
+            <select
+              aria-label="Select market"
+              value={selectedMarket?.coin ?? ''}
+              onChange={(e) => {
+                const next = markets.find((m) => m.coin === e.target.value);
+                if (next) setSelectedMarket(next);
+              }}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="" disabled>
+                {markets.length > 0 ? 'Select a market…' : 'Loading markets…'}
+              </option>
+              {markets.map((m) => (
+                <option key={m.coin} value={m.coin}>
+                  {m.coin}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </header>

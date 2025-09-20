@@ -101,7 +101,7 @@ export const useTradingStore = create<TradingState>()(
       
       updateChartData: (candles) => set({
         chartData: candles.map(candle => ({
-          time: candle.t as any, // Keep as milliseconds for UTCTimestamp
+          time: Math.floor(candle.t / 1000) as any, // Convert ms to seconds for UTCTimestamp
           open: parseFloat(candle.o),
           high: parseFloat(candle.h),
           low: parseFloat(candle.l),
