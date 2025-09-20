@@ -1,0 +1,45 @@
+{
+  "name": "trademiniterminal",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@types/ws": "^8.18.1",
+    "lightweight-charts": "^5.0.8",
+    "lucide-react": "^0.544.0",
+    "next": "^14.0.0",
+    "qr-scanner": "^1.4.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-qr-scanner": "^1.0.0-alpha.11",
+    "ws": "^8.18.3",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "typescript",
+    "pwa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "Trade Mini Terminal - A mobile-friendly PWA built with Next.js and TypeScript"
+}

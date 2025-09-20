@@ -1,0 +1,36 @@
+{
+  "name": "Hyperliquid Terminal",
+  "short_name": "HL Terminal",
+  "description": "Professional mobile-first trading terminal for Hyperliquid perpetual futures",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"],
+  "lang": "en",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "features": [
+    "Real-time market data",
+    "Order book visualization",
+    "Account management",
+    "QR code scanning"
+  ]
+}
