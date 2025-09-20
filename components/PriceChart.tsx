@@ -16,17 +16,16 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   const volumeSeriesRef = useRef<any>(null);
   const isLoadingRef = useRef(false);
   const [timeframe, setTimeframe] = useState('1m');
-  const [useMockData, setUseMockData] = useState(false); // Start with real data
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isChartReady, setIsChartReady] = useState(false);
 
-  const { 
-    selectedMarket, 
-    chartData, 
+  const {
+    selectedMarket,
+    chartData,
     updateChartData,
     setLoading,
-    setError 
+    setError
   } = useTradingStore();
 
   // Initialize chart
@@ -35,9 +34,9 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     if (!selectedMarket || !chartContainerRef.current) {
       return;
     }
-    
+
     console.log('Initializing chart for market:', selectedMarket.coin);
-    
+
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height,
@@ -80,9 +79,9 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     candlestickSeriesRef.current = candlestickSeries;
     volumeSeriesRef.current = volumeSeries;
     chartRef.current = chart;
-    
+
     console.log('Chart created successfully');
-    
+
     // Mark chart as ready
     setIsChartReady(true);
 
@@ -119,7 +118,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     console.log('Raw chart data length:', chartData.length);
     console.log('Sample raw chart data:', chartData[0]);
     console.log('All raw chart data:', chartData);
-    
+
     const candleData: CandlestickData[] = chartData.map(candle => ({
       time: candle.time as UTCTimestamp,
       open: candle.open,
@@ -133,7 +132,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       value: candle.volume,
       color: candle.close >= candle.open ? '#10b981' : '#ef4444',
     }));
-    
+
     console.log('Transformed candle data length:', candleData.length);
     console.log('Sample transformed candle data:', candleData[0]);
     console.log('Sample transformed volume data:', volumeData[0]);
@@ -142,7 +141,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     console.log('Setting chart data:', candleData.length, 'candles');
     console.log('Sample candle data:', candleData[0]);
     console.log('Sample volume data:', volumeData[0]);
-    
+
     try {
       candlestickSeriesRef.current.setData(candleData);
       volumeSeriesRef.current.setData(volumeData);
@@ -161,14 +160,14 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   const generateCandlestickMockData = () => {
     const mockCandles = [];
     const now = Math.floor(Date.now() / 1000);
-    const intervalSeconds = timeframe === '1m' ? 60 : 
-                           timeframe === '5m' ? 300 : 
-                           timeframe === '15m' ? 900 : 
-                           timeframe === '1h' ? 3600 : 
-                           timeframe === '4h' ? 14400 : 86400; // 1d
-    
+    const intervalSeconds = timeframe === '1m' ? 60 :
+      timeframe === '5m' ? 300 :
+        timeframe === '15m' ? 900 :
+          timeframe === '1h' ? 3600 :
+            timeframe === '4h' ? 14400 : 86400; // 1d
+
     let basePrice = 50000; // Starting price for BTC-like data
-    
+
     for (let i = 100; i >= 0; i--) {
       const time = now - (i * intervalSeconds);
       const open = basePrice;
@@ -178,7 +177,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       const high = Math.max(open, close) + Math.random() * volatility * basePrice * 0.5;
       const low = Math.min(open, close) - Math.random() * volatility * basePrice * 0.5;
       const volume = Math.random() * 1000 + 100;
-      
+
       mockCandles.push({
         T: time * 1000, // Convert to milliseconds for mock data
         t: time * 1000, // Convert to milliseconds for mock data
@@ -190,23 +189,16 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
         s: selectedMarket?.coin || 'BTC',
         n: Math.floor(Math.random() * 100) + 10 // Random number of trades
       });
-      
+
       basePrice = close; // Next candle starts where this one ended
     }
-    
+
     return mockCandles;
   };
 
   // Load candle data when market changes and poll for updates
   useEffect(() => {
-    console.log('useEffect triggered with:', {
-      selectedMarket: selectedMarket?.coin,
-      timeframe,
-      useMockData,
-      refreshKey,
-      isLoadingRef: isLoadingRef.current
-    });
-    
+
     const loadCandles = async () => {
       if (!selectedMarket || isLoadingRef.current) {
         console.log('Skipping load - no market or already loading');
@@ -223,54 +215,44 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
           timeframe: timeframe,
           market: selectedMarket
         });
-        
-        if (useMockData) {
-          // Use mock data for testing
-          console.log('Using mock data for chart testing...');
-          const mockCandles = generateCandlestickMockData();
-          console.log('Generated mock candles:', mockCandles.length);
-          console.log('Sample mock candle:', mockCandles[0]);
-          
-          updateChartData(mockCandles);
-        } else {
-          // Try real API data
-          console.log('Trying real API data...');
-          
-          // Use milliseconds format (epoch milliseconds as per API docs)
-          const endTime = Date.now();
-          const startTime = endTime - (24 * 60 * 60 * 1000); // Last 24 hours in milliseconds
-          
-          console.log('Time range (epoch milliseconds):', {
-            startTime,
-            endTime,
-            startTimeISO: new Date(startTime).toISOString(),
-            endTimeISO: new Date(endTime).toISOString()
-          });
-          
-          try {
-            // Try the API with correct format
-            const candles = await hyperliquidAPI.fetchCandles(
-              selectedMarket.coin,
-              timeframe,
-              startTime,
-              endTime
-            );
 
-            console.log('Fetched candles:', candles.length);
-            if (candles && candles.length > 0) {
-              console.log('Sample candle from API:', candles[0]);
-              console.log('All candles structure:', candles);
-              updateChartData(candles);
-            } else {
-              console.log('No candles returned from API, falling back to mock data');
-              const mockCandles = generateCandlestickMockData();
-              updateChartData(mockCandles);
-            }
-          } catch (apiError) {
-            console.log('API failed, falling back to mock data:', apiError);
+        // Try real API data
+        console.log('Trying real API data...');
+
+        // Use milliseconds format (epoch milliseconds as per API docs)
+        const endTime = Date.now();
+        const startTime = endTime - (24 * 60 * 60 * 1000); // Last 24 hours in milliseconds
+
+        console.log('Time range (epoch milliseconds):', {
+          startTime,
+          endTime,
+          startTimeISO: new Date(startTime).toISOString(),
+          endTimeISO: new Date(endTime).toISOString()
+        });
+
+        try {
+          // Try the API with correct format
+          const candles = await hyperliquidAPI.fetchCandles(
+            selectedMarket.coin,
+            timeframe,
+            startTime,
+            endTime
+          );
+
+          console.log('Fetched candles:', candles.length);
+          if (candles && candles.length > 0) {
+            console.log('Sample candle from API:', candles[0]);
+            console.log('All candles structure:', candles);
+            updateChartData(candles);
+          } else {
+            console.log('No candles returned from API, falling back to mock data');
             const mockCandles = generateCandlestickMockData();
             updateChartData(mockCandles);
           }
+        } catch (apiError) {
+          console.log('API failed, falling back to mock data:', apiError);
+          const mockCandles = generateCandlestickMockData();
+          updateChartData(mockCandles);
         }
       } catch (error) {
         console.error('Failed to load candles:', error);
@@ -289,7 +271,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     return () => {
       isLoadingRef.current = false;
     };
-  }, [selectedMarket, timeframe, useMockData, refreshKey]);
+  }, [selectedMarket, timeframe, refreshKey]);
 
   // Update chart when data changes
   useEffect(() => {
@@ -300,7 +282,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       chart: !!chartRef.current,
       isChartReady
     });
-    
+
     if (!isChartReady || !candlestickSeriesRef.current || !volumeSeriesRef.current || !chartData.length) {
       console.log('Chart not ready or no data:', {
         isChartReady,
@@ -344,7 +326,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
               </p>
             )}
           </div>
-          
+
           {/* Controls */}
           <div className="flex items-center gap-3">
             {/* Refresh Button */}
@@ -355,30 +337,17 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
             >
               {isLoadingData ? 'Loading...' : 'Refresh'}
             </button>
-            
-            {/* Mock Data Toggle */}
-            <button
-              onClick={() => setUseMockData(!useMockData)}
-              className={`px-3 py-1 text-xs rounded transition-colors ${
-                useMockData
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-              }`}
-            >
-              {useMockData ? 'Mock Data' : 'Real API'}
-            </button>
-            
+
             {/* Timeframe selector */}
             <div className="flex gap-1">
               {timeframes.map((tf) => (
                 <button
                   key={tf.value}
                   onClick={() => setTimeframe(tf.value)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
-                    timeframe === tf.value
+                  className={`px-2 py-1 text-xs rounded transition-colors ${timeframe === tf.value
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
+                    }`}
                 >
                   {tf.label}
                 </button>
@@ -395,8 +364,8 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
             <p className="text-gray-400">Select a market to view chart</p>
           </div>
         ) : (
-          <div 
-            ref={chartContainerRef} 
+          <div
+            ref={chartContainerRef}
             style={{ height, width: '100%' }}
             className="w-full relative"
           >
