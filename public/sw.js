@@ -49,6 +49,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Skip non-GET requests for caching strategies
+  if (request.method !== 'GET') {
+    return;
+  }
+
   // Handle API requests with network-first strategy
   if (url.hostname === 'api.hyperliquid.xyz') {
     event.respondWith(
@@ -68,7 +73,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default: network first for other requests
+  // Default: network first for other GET requests
   event.respondWith(
     networkFirstStrategy(request, CACHE_NAME)
   );
@@ -77,6 +82,11 @@ self.addEventListener('fetch', (event) => {
 // Cache-first strategy for static assets
 async function cacheFirstStrategy(request, cacheName) {
   try {
+    // Only handle GET requests
+    if (request.method !== 'GET') {
+      return fetch(request);
+    }
+    
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
     
@@ -104,8 +114,8 @@ async function networkFirstStrategy(request, cacheName) {
     const networkResponse = await fetch(request);
     
     if (networkResponse.status === 200) {
-      // Cache successful responses (except WebSocket upgrades)
-      if (!request.headers.get('upgrade')) {
+      // Only cache GET requests (Cache API doesn't support POST/PUT/DELETE)
+      if (request.method === 'GET' && !request.headers.get('upgrade')) {
         const cache = await caches.open(cacheName);
         cache.put(request, networkResponse.clone());
       }
@@ -114,12 +124,14 @@ async function networkFirstStrategy(request, cacheName) {
     return networkResponse;
   } catch (error) {
     
-    // Fallback to cache
-    const cache = await caches.open(cacheName);
-    const cachedResponse = await cache.match(request);
-    
-    if (cachedResponse) {
-      return cachedResponse;
+    // Fallback to cache (only for GET requests)
+    if (request.method === 'GET') {
+      const cache = await caches.open(cacheName);
+      const cachedResponse = await cache.match(request);
+      
+      if (cachedResponse) {
+        return cachedResponse;
+      }
     }
     
     // Return offline page for navigation requests
