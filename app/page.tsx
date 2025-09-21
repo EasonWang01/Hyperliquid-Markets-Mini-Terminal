@@ -62,11 +62,10 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gray-900">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-40">
-
-        {/* Token Select Control */}
-        <div className="px-4 pb-4">
-          <div className="max-w-sm">
+      <header className="trading-header">
+        {/* Market Select Control */}
+        <div className="market-select-section">
+          <div className="market-select-wrapper">
             <select
               aria-label="Select market"
               value={selectedMarket?.coin ?? ''}
@@ -74,13 +73,13 @@ export default function Home() {
                 const next = markets.find((m) => m.coin === e.target.value);
                 if (next) setSelectedMarket(next);
               }}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+              className="market-select-dropdown"
             >
               <option value="" disabled>
                 {markets.length > 0 ? 'Select a market…' : 'Loading markets…'}
               </option>
               {markets.map((m) => (
-                <option key={m.coin} value={m.coin}>
+                <option key={m.coin} value={m.coin} className="market-select-option">
                   {m.coin}
                 </option>
               ))}

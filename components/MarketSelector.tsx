@@ -37,26 +37,26 @@ export default function MarketSelector({ onClose }: MarketSelectorProps) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700">
+    <div className="market-selector-container">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <h2 className="text-lg font-semibold text-white mb-3">Select Market</h2>
+      <div className="market-selector-header">
+        <h2 className="market-selector-title">Select Market</h2>
         
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="market-search-container">
+          <Search className="market-search-icon" />
           <input
             type="text"
             placeholder="Search markets..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            className="market-search-input"
           />
         </div>
       </div>
 
       {/* Markets List */}
-      <div className="max-h-96 overflow-y-auto">
+      <div className="market-list">
         {filteredMarkets.length === 0 ? (
           <div className="p-4 text-center">
             <p className="text-gray-400">
@@ -64,7 +64,7 @@ export default function MarketSelector({ onClose }: MarketSelectorProps) {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-700">
+          <div>
             {filteredMarkets.map((market) => (
               <MarketItem
                 key={market.coin}
@@ -87,35 +87,29 @@ interface MarketItemProps {
 }
 
 function MarketItem({ market, isSelected, onSelect }: MarketItemProps) {
-  // Simple display without individual price fetching to avoid rate limiting
-
   return (
     <button
       onClick={onSelect}
-      className={`w-full p-4 text-left hover:bg-gray-700 transition-colors ${
-        isSelected ? 'bg-gray-700 border-r-2 border-blue-500' : ''
-      }`}
+      className={`market-item ${isSelected ? 'selected' : ''}`}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-white">{market.coin}</h3>
+      <div className="market-item-content">
+        <div className="market-item-info">
+          <div className="market-item-header">
+            <h3 className="market-symbol">{market.coin}</h3>
             {market.onlyIsolated && (
-              <span className="text-xs bg-orange-600 text-white px-1.5 py-0.5 rounded">
+              <span className="market-badge">
                 ISO
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-400">{market.name}</p>
-          <p className="text-xs text-gray-500">
+          <p className="market-name">{market.name}</p>
+          <p className="market-leverage">
             Max Leverage: {market.maxLeverage}x
           </p>
         </div>
         
-        <div className="text-right">
-          <p className="text-sm text-gray-400">
-            Click to select
-          </p>
+        <div className="market-select-hint">
+          Click to select
         </div>
       </div>
     </button>

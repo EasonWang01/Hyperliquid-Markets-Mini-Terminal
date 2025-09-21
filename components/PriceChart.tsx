@@ -313,47 +313,36 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white">
-              {selectedMarket ? selectedMarket.coin : 'Price Chart'}
-            </h2>
-            {selectedMarket && (
-              <p className="text-sm text-gray-400">
-                {selectedMarket.name}
-              </p>
-            )}
+      {/* Chart Controls */}
+      <div className="chart-controls">
+        {/* Market Info */}
+        <div className="market-info">
+          <div className="market-symbol-large">
+            {selectedMarket?.coin || 'Select Market'}
           </div>
+          <div className="market-symbol-small">
+            {selectedMarket?.coin || 'Select Market'}
+          </div>
+        </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-3">
-            {/* Refresh Button */}
+        {/* Timeframe Controls */}
+        <div className="timeframe-controls">
+          <button
+            onClick={() => setRefreshKey(prev => prev + 1)}
+            disabled={isLoadingData}
+            className={`timeframe-button refresh ${isLoadingData ? 'disabled' : ''}`}
+          >
+            {isLoadingData ? 'Loading...' : 'Refresh'}
+          </button>
+          {timeframes.map((tf) => (
             <button
-              onClick={() => setRefreshKey(prev => prev + 1)}
-              disabled={isLoadingData}
-              className="px-3 py-1 text-xs rounded transition-colors bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              key={tf.value}
+              onClick={() => setTimeframe(tf.value)}
+              className={`timeframe-button ${timeframe === tf.value ? 'active' : ''}`}
             >
-              {isLoadingData ? 'Loading...' : 'Refresh'}
+              {tf.label}
             </button>
-
-            {/* Timeframe selector */}
-            <div className="flex gap-1">
-              {timeframes.map((tf) => (
-                <button
-                  key={tf.value}
-                  onClick={() => setTimeframe(tf.value)}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${timeframe === tf.value
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                    }`}
-                >
-                  {tf.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
