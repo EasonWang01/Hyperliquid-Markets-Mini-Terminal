@@ -16,8 +16,6 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   const volumeSeriesRef = useRef<any>(null);
   const isLoadingRef = useRef(false);
   const [timeframe, setTimeframe] = useState('1m');
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [isChartReady, setIsChartReady] = useState(false);
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
 
@@ -236,7 +234,6 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
 
       console.log('Starting to load candles...');
       isLoadingRef.current = true;
-      setIsLoadingData(true);
       setLoading(true);
       try {
         console.log('Loading candles for:', {
@@ -289,7 +286,6 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       } finally {
         console.log('Finished loading candles');
         setLoading(false);
-        setIsLoadingData(false);
         isLoadingRef.current = false;
       }
     };
@@ -300,7 +296,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     return () => {
       isLoadingRef.current = false;
     };
-  }, [selectedMarket, timeframe, refreshKey]);
+  }, [selectedMarket, timeframe]);
 
   // Update chart when data changes
   useEffect(() => {
@@ -439,13 +435,6 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
             </span>
           </div>
           
-          <button
-            onClick={() => setRefreshKey(prev => prev + 1)}
-            disabled={isLoadingData}
-            className={`timeframe-button refresh ${isLoadingData ? 'disabled' : ''}`}
-          >
-            {isLoadingData ? 'Loading...' : 'Refresh'}
-          </button>
           {timeframes.map((tf) => (
             <button
               key={tf.value}
