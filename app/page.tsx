@@ -110,34 +110,6 @@ export default function Home() {
 
           {/* Sidebar Content Area (OrderBook & Trades) */}
           <div className="col-span-12 lg:col-span-4 space-y-4">
-            {/* Mobile Tab Navigation */}
-            <div className="lg:hidden flex bg-gray-800 rounded-lg p-1 border border-gray-700">
-              <button
-                onClick={() => setActiveTab('chart')}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === 'chart' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Chart
-              </button>
-              <button
-                onClick={() => setActiveTab('orderbook')}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === 'orderbook' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Book
-              </button>
-              <button
-                onClick={() => setActiveTab('trades')}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === 'trades' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:text-white'
-                }`}
-              >
-                Trades
-              </button>
-            </div>
-
             {/* Content */}
             <div className={`${activeTab !== 'orderbook' && 'hidden'} lg:block`}>
               <OrderBook />

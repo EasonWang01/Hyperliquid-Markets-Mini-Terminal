@@ -66,16 +66,16 @@ export default function TradesList() {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700">
+    <div className="trades-container">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="trades-header">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Trades</h2>
-          <div className="flex items-center gap-2">
+          <h2 className="trades-title">Recent Trades</h2>
+          <div className="trades-controls">
             <select
               value={maxTrades}
               onChange={(e) => setMaxTrades(parseInt(e.target.value))}
-              className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm"
+              className="trades-select"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -87,28 +87,28 @@ export default function TradesList() {
       </div>
 
       {/* Trades Data */}
-      <div className="p-4">
+      <div className="trades-content">
         {!selectedMarket ? (
-          <div className="text-center py-8">
-            <p className="text-gray-400">Select a market to view trades</p>
+          <div className="trades-empty">
+            <p>Select a market to view trades</p>
           </div>
         ) : trades.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-400 mt-2">Loading trades...</p>
+          <div className="trades-loading">
+            <div className="trades-spinner"></div>
+            <p>Loading trades...</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="trades-table">
             {/* Header Row */}
-            <div className="grid grid-cols-4 gap-2 text-xs text-gray-400 font-medium pb-2 border-b border-gray-700">
+            <div className="trades-header-row">
               <span className="text-left">Time</span>
               <span className="text-right">Price</span>
-              <span className="text-right">Size</span>
+              <span className="text-right">Size ({selectedMarket.coin})</span>
               <span className="text-center">Side</span>
             </div>
 
             {/* Trades List */}
-            <div className="space-y-1 max-h-96 overflow-y-auto">
+            <div className="trades-list">
               {displayTrades.map((trade, index) => (
                 <TradeRow
                   key={`${trade.hash}-${index}`}
@@ -120,10 +120,10 @@ export default function TradesList() {
 
             {/* Load More */}
             {trades.length > maxTrades && (
-              <div className="text-center pt-2">
+              <div className="trades-load-more">
                 <button
                   onClick={() => setMaxTrades(prev => prev + 20)}
-                  className="text-blue-400 hover:text-blue-300 text-sm"
+                  className="trades-load-more-btn"
                 >
                   Load more trades
                 </button>
@@ -143,8 +143,6 @@ interface TradeRowProps {
 
 function TradeRow({ trade, decimals }: TradeRowProps) {
   const isBuy = trade.side === 'B';
-  const sideColor = isBuy ? 'text-green-400' : 'text-red-400';
-  const bgColor = isBuy ? 'bg-green-900/10' : 'bg-red-900/10';
 
   const formatTime = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -167,37 +165,35 @@ function TradeRow({ trade, decimals }: TradeRowProps) {
   };
 
   return (
-    <div className={`grid grid-cols-4 gap-2 px-2 py-1.5 text-sm rounded hover:bg-gray-700/50 transition-colors ${bgColor}`}>
+    <div className={`trade-row ${isBuy ? 'buy' : 'sell'}`}>
       {/* Time */}
-      <div className="flex items-center gap-1 text-gray-300">
-        <Clock className="w-3 h-3" />
-        <span className="font-mono text-xs">
+      <div className="trade-time">
+        <Clock className="trade-time-icon" />
+        <span>
           {formatTime(trade.time)}
         </span>
       </div>
 
       {/* Price */}
-      <div className={`text-right font-mono ${sideColor}`}>
-        {parseFloat(trade.px).toFixed(4)}
+      <div className={`trade-price ${isBuy ? 'buy' : 'sell'}`}>
+        {parseFloat(trade.px).toFixed(3)}
       </div>
 
       {/* Size */}
-      <div className="text-right font-mono text-white">
+      <div className="trade-size">
         {formatSize(trade.sz, decimals)}
       </div>
 
       {/* Side */}
-      <div className="flex items-center justify-center">
-        <div className={`flex items-center gap-1 ${sideColor}`}>
-          {isBuy ? (
-            <TrendingUp className="w-3 h-3" />
-          ) : (
-            <TrendingDown className="w-3 h-3" />
-          )}
-          <span className="text-xs font-semibold">
-            {isBuy ? 'BUY' : 'SELL'}
-          </span>
-        </div>
+      <div className={`trade-side ${isBuy ? 'buy' : 'sell'}`}>
+        {isBuy ? (
+          <TrendingUp className="trade-side-icon" />
+        ) : (
+          <TrendingDown className="trade-side-icon" />
+        )}
+        <span className="trade-side-text">
+          {isBuy ? 'BUY' : 'SELL'}
+        </span>
       </div>
     </div>
   );
@@ -215,10 +211,9 @@ export function TradeFlash({ trade }: { trade: Trade }) {
   if (!show) return null;
 
   const isBuy = trade.side === 'B';
-  const bgColor = isBuy ? 'bg-green-500' : 'bg-red-500';
 
   return (
-    <div className={`fixed top-4 right-4 ${bgColor} text-white px-3 py-2 rounded-lg shadow-lg animate-pulse z-50`}>
+    <div className={`trade-flash ${isBuy ? 'buy' : 'sell'}`}>
       <div className="text-sm font-semibold">
         {isBuy ? 'BUY' : 'SELL'} {trade.coin}
       </div>

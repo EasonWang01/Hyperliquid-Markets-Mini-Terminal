@@ -467,3 +467,245 @@ input:focus, select:focus, textarea:focus {
   color: #6b7280;
   font-size: 14px;
 }
+
+/* Trades List Styles */
+.trades-container {
+  margin-top: 20px;
+  background-color: #1f2937;
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+.trades-header {
+  padding: 16px;
+  border-bottom: 1px solid #374151;
+}
+
+.trades-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.trades-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trades-select {
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.trades-content {
+  padding: 16px;
+}
+
+.trades-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trades-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #374151;
+}
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 384px;
+  overflow-y: auto;
+}
+
+.trades-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.trades-list::-webkit-scrollbar-track {
+  background: #374151;
+  border-radius: 3px;
+}
+
+.trades-list::-webkit-scrollbar-thumb {
+  background: #6b7280;
+  border-radius: 3px;
+}
+
+.trades-list::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Trade Row Styles */
+.trade-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+  cursor: pointer;
+}
+
+.trade-row:hover {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.trade-row.buy {
+  background-color: rgba(34, 197, 94, 0.05);
+}
+
+.trade-row.sell {
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.trade-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #d1d5db;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.trade-time-icon {
+  width: 12px;
+  height: 12px;
+  color: #9ca3af;
+}
+
+.trade-price {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.trade-price.buy {
+  color: #4ade80;
+}
+
+.trade-price.sell {
+  color: #f87171;
+}
+
+.trade-size {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+  color: #e5e7eb;
+  font-weight: 500;
+}
+
+.trade-side {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.trade-side.buy {
+  color: #4ade80;
+}
+
+.trade-side.sell {
+  color: #f87171;
+}
+
+.trade-side-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.trade-side-text {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Load More Button */
+.trades-load-more {
+  text-align: center;
+  padding-top: 8px;
+}
+
+.trades-load-more-btn {
+  color: #60a5fa;
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.trades-load-more-btn:hover {
+  color: #93c5fd;
+}
+
+/* Loading and Empty States */
+.trades-loading {
+  text-align: center;
+  padding: 32px;
+}
+
+.trades-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid transparent;
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 8px;
+}
+
+.trades-empty {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Trade Flash Animation */
+.trade-flash {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  animation: flashPulse 2s ease-in-out;
+}
+
+.trade-flash.buy {
+  background-color: #10b981;
+  color: white;
+}
+
+.trade-flash.sell {
+  background-color: #ef4444;
+  color: white;
+}
+
+@keyframes flashPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
