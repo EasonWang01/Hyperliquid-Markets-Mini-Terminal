@@ -222,3 +222,248 @@ input:focus, select:focus, textarea:focus {
     color-scheme: dark;
   }
 }
+
+/* Order Book Styles */
+.order-book-container {
+  background-color: #1f2937;
+  border-radius: 8px;
+  border: 1px solid #374151;
+}
+
+.order-book-header {
+  padding: 16px;
+  border-bottom: 1px solid #374151;
+}
+
+.order-book-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.order-book-content {
+  padding: 16px;
+}
+
+.order-book-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+.order-book-column {
+  flex: 1;
+}
+
+.order-book-header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.order-book-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Bid Row Styles */
+.bid-row {
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.bid-row:hover {
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+.bid-row.best-bid {
+  background-color: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.bid-row.best-bid:hover {
+  background-color: rgba(34, 197, 94, 0.3);
+}
+
+.bid-depth-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.2));
+  border-radius: 4px;
+}
+
+.bid-row.best-bid .bid-depth-bar {
+  background: linear-gradient(to right, rgba(34, 197, 94, 0.4), rgba(34, 197, 94, 0.3));
+}
+
+.bid-row-content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.bid-text {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  color: #4ade80;
+}
+
+.bid-text.best-bid {
+  color: #bbf7d0;
+}
+
+.bid-price {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #86efac;
+  text-align: right;
+}
+
+.bid-price.best-bid {
+  color: #dcfce7;
+}
+
+/* Ask Row Styles */
+.ask-row {
+  position: relative;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.ask-row:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.ask-row.best-ask {
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.ask-row.best-ask:hover {
+  background-color: rgba(239, 68, 68, 0.3);
+}
+
+.ask-depth-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(to left, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.2));
+  border-radius: 4px;
+}
+
+.ask-row.best-ask .ask-depth-bar {
+  background: linear-gradient(to left, rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0.3));
+}
+
+.ask-row-content {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+}
+
+.ask-text {
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  color: #f87171;
+}
+
+.ask-text.best-ask {
+  color: #fecaca;
+}
+
+.ask-price {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #fca5a5;
+  text-align: right;
+}
+
+.ask-price.best-ask {
+  color: #fef2f2;
+}
+
+/* Settings and Controls */
+.order-book-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-book-select {
+  background-color: #4b5563;
+  border: 1px solid #6b7280;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: white;
+  font-size: 12px;
+}
+
+.order-book-settings-btn {
+  padding: 4px;
+  border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.order-book-settings-btn:hover {
+  background-color: #374151;
+}
+
+.order-book-settings-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #374151;
+  border-radius: 8px;
+}
+
+.order-book-slider {
+  width: 100%;
+}
+
+/* Loading and Empty States */
+.order-book-loading {
+  text-align: center;
+  padding: 32px;
+}
+
+.order-book-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid transparent;
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.order-book-empty {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+  font-size: 14px;
+}

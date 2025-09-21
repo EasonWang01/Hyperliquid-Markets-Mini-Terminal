@@ -91,8 +91,20 @@ export default function OrderBook() {
     };
   }, [orderBook, orderBookAggregation]);
 
-  const bids = aggregatedOrderBook?.levels[0]?.slice(0, maxLevels) || [];
-  const asks = aggregatedOrderBook?.levels[1]?.slice(0, maxLevels) || [];
+  const bids = aggregatedOrderBook?.levels[0]?.slice(0, maxLevels).sort((a, b) => parseFloat(b.px) - parseFloat(a.px)) || [];
+  const asks = aggregatedOrderBook?.levels[1]?.slice(0, maxLevels).sort((a, b) => parseFloat(a.px) - parseFloat(b.px)) || [];
+  
+  // Debug: Check if we're getting different data for bids vs asks
+  console.log('OrderBook Data Check:', {
+    hasOrderBook: !!orderBook,
+    levelsLength: orderBook?.levels?.length,
+    level0Length: orderBook?.levels?.[0]?.length,
+    level1Length: orderBook?.levels?.[1]?.length,
+    bidsLength: bids.length,
+    asksLength: asks.length,
+    firstBid: bids[0],
+    firstAsk: asks[0]
+  });
 
   // Calculate totals for depth visualization
   const bidTotals = useMemo(() => {
@@ -108,51 +120,48 @@ export default function OrderBook() {
     return asks.map(ask => {
       total += parseFloat(ask.sz);
       return total;
-    }).reverse();
+    });
   }, [asks]);
 
   const maxTotal = Math.max(
     bidTotals[bidTotals.length - 1] || 0,
-    askTotals[0] || 0
+    askTotals[askTotals.length - 1] || 0
   );
 
   const aggregationOptions = [0, 0.01, 0.1, 1, 10, 100];
 
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700">
+    <div className="order-book-container">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="order-book-header">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Order Book</h2>
-          <button
-            onClick={() => setShowSettings(!showSettings)}
-            className="p-1 hover:bg-gray-700 rounded"
-          >
-            <Settings className="w-4 h-4 text-gray-400" />
-          </button>
+          <h2 className="order-book-title">Order Book</h2>
+          <div className="order-book-controls">
+            {/* Aggregation Selector */}
+            <select
+              value={orderBookAggregation}
+              onChange={(e) => setOrderBookAggregation(parseFloat(e.target.value))}
+              className="order-book-select"
+            >
+              {aggregationOptions.map(option => (
+                <option key={option} value={option}>
+                  {option === 0 ? '0.001' : option.toString()}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="order-book-settings-btn"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Settings Panel */}
         {showSettings && (
-          <div className="mt-3 p-3 bg-gray-700 rounded-lg">
+          <div className="order-book-settings-panel">
             <div className="space-y-3">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">
-                  Price Aggregation
-                </label>
-                <select
-                  value={orderBookAggregation}
-                  onChange={(e) => setOrderBookAggregation(parseFloat(e.target.value))}
-                  className="w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white text-sm"
-                >
-                  {aggregationOptions.map(option => (
-                    <option key={option} value={option}>
-                      {option === 0 ? 'No aggregation' : option.toString()}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
                   Max Levels ({maxLevels})
@@ -163,7 +172,7 @@ export default function OrderBook() {
                   max="25"
                   value={maxLevels}
                   onChange={(e) => setMaxLevels(parseInt(e.target.value))}
-                  className="w-full"
+                  className="order-book-slider"
                 />
               </div>
             </div>
@@ -172,76 +181,74 @@ export default function OrderBook() {
       </div>
 
       {/* Order Book Data */}
-      <div className="p-4">
+      <div className="order-book-content">
         {!selectedMarket ? (
-          <div className="text-center py-8">
-            <p className="text-gray-400">Select a market to view order book</p>
+          <div className="order-book-empty">
+            <p>Select a market to view order book</p>
           </div>
         ) : !orderBook ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-400 mt-2">Loading order book...</p>
+          <div className="order-book-loading">
+            <div className="order-book-spinner"></div>
+            <p>Loading order book...</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Header Row */}
-            <div className="grid grid-cols-3 gap-2 text-xs text-gray-400 font-medium">
-              <span className="text-right">Size</span>
-              <span className="text-center">Price</span>
-              <span className="text-left">Total</span>
-            </div>
-
-            {/* Asks (Sells) */}
-            <div className="space-y-1">
-              {asks.reverse().map((ask, index) => {
-                const askIndex = asks.length - 1 - index;
-                const total = askTotals[askIndex] || 0;
-                const depthPercent = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-                
-                return (
-                  <OrderBookRow
-                    key={`ask-${ask.px}`}
-                    price={ask.px}
-                    size={ask.sz}
-                    total={total}
-                    depthPercent={depthPercent}
-                    side="ask"
-                    decimals={selectedMarket.szDecimals}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Spread */}
-            {bids.length > 0 && asks.length > 0 && (
-              <div className="py-2 border-t border-b border-gray-700">
-                <div className="text-center">
-                  <div className="text-sm text-gray-400">Spread</div>
-                  <div className="text-lg font-semibold text-white">
-                    {(parseFloat(asks[0]?.px || '0') - parseFloat(bids[0]?.px || '0')).toFixed(4)}
-                  </div>
-                </div>
+          <div className="order-book-layout">
+            {/* Bids (Left Side) - Green */}
+            <div className="order-book-column">
+              <div className="order-book-header-row">
+                <span className="text-left">Total ({selectedMarket.coin})</span>
+                <span className="text-right">Price</span>
               </div>
-            )}
+              <div className="order-book-rows">
+                {bids.length > 0 ? bids.map((bid, index) => {
+                  const total = bidTotals[index] || 0;
+                  const depthPercent = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+                  const isBestBid = index === 0;
+                  
+                  return (
+                    <BidRow
+                      key={`bid-${bid.px}`}
+                      price={bid.px}
+                      size={bid.sz}
+                      total={total}
+                      depthPercent={depthPercent}
+                      decimals={selectedMarket.szDecimals}
+                      isBestBid={isBestBid}
+                    />
+                  );
+                }) : (
+                  <div className="order-book-empty">No bid data</div>
+                )}
+              </div>
+            </div>
 
-            {/* Bids (Buys) */}
-            <div className="space-y-1">
-              {bids.map((bid, index) => {
-                const total = bidTotals[index] || 0;
-                const depthPercent = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
-                
-                return (
-                  <OrderBookRow
-                    key={`bid-${bid.px}`}
-                    price={bid.px}
-                    size={bid.sz}
-                    total={total}
-                    depthPercent={depthPercent}
-                    side="bid"
-                    decimals={selectedMarket.szDecimals}
-                  />
-                );
-              })}
+            {/* Asks (Right Side) - Red */}
+            <div className="order-book-column">
+              <div className="order-book-header-row">
+                <span className="text-left">Price</span>
+                <span className="text-right">Total ({selectedMarket.coin})</span>
+              </div>
+              <div className="order-book-rows">
+                {asks.length > 0 ? asks.map((ask, index) => {
+                  const total = askTotals[index] || 0;
+                  const depthPercent = maxTotal > 0 ? (total / maxTotal) * 100 : 0;
+                  const isBestAsk = index === 0;
+                  
+                  return (
+                    <AskRow
+                      key={`ask-${ask.px}`}
+                      price={ask.px}
+                      size={ask.sz}
+                      total={total}
+                      depthPercent={depthPercent}
+                      decimals={selectedMarket.szDecimals}
+                      isBestAsk={isBestAsk}
+                    />
+                  );
+                }) : (
+                  <div className="order-book-empty">No ask data</div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -250,37 +257,62 @@ export default function OrderBook() {
   );
 }
 
-interface OrderBookRowProps {
+interface BidRowProps {
   price: string;
   size: string;
   total: number;
   depthPercent: number;
-  side: 'bid' | 'ask';
   decimals: number;
+  isBestBid?: boolean;
 }
 
-function OrderBookRow({ price, size, total, depthPercent, side, decimals }: OrderBookRowProps) {
-  const sideColor = side === 'bid' ? 'text-green-400' : 'text-red-400';
-  const bgColor = side === 'bid' ? 'bg-green-900/20' : 'bg-red-900/20';
-
+function BidRow({ price, size, total, depthPercent, decimals, isBestBid = false }: BidRowProps) {
   return (
-    <div className="relative group cursor-pointer hover:bg-gray-700/50 rounded">
-      {/* Depth visualization */}
+    <div className={`bid-row ${isBestBid ? 'best-bid' : ''}`}>
+      {/* Depth visualization - green bars extending left */}
       <div
-        className={`absolute inset-y-0 right-0 ${bgColor} rounded`}
+        className="bid-depth-bar"
         style={{ width: `${depthPercent}%` }}
       />
       
       {/* Row content */}
-      <div className="relative grid grid-cols-3 gap-2 px-2 py-1 text-sm">
-        <span className="text-right text-white font-mono">
-          {parseFloat(size).toFixed(decimals)}
+      <div className="bid-row-content">
+        <span className={`bid-text ${isBestBid ? 'best-bid' : ''}`}>
+          {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
-        <span className={`text-center font-mono ${sideColor}`}>
-          {parseFloat(price).toFixed(4)}
+        <span className={`bid-price ${isBestBid ? 'best-bid' : ''}`}>
+          {parseFloat(price).toFixed(3)}
         </span>
-        <span className="text-left text-gray-300 font-mono">
-          {total.toFixed(decimals)}
+      </div>
+    </div>
+  );
+}
+
+interface AskRowProps {
+  price: string;
+  size: string;
+  total: number;
+  depthPercent: number;
+  decimals: number;
+  isBestAsk?: boolean;
+}
+
+function AskRow({ price, size, total, depthPercent, decimals, isBestAsk = false }: AskRowProps) {
+  return (
+    <div className={`ask-row ${isBestAsk ? 'best-ask' : ''}`}>
+      {/* Depth visualization - red bars extending right */}
+      <div
+        className="ask-depth-bar"
+        style={{ width: `${depthPercent}%` }}
+      />
+      
+      {/* Row content */}
+      <div className="ask-row-content">
+        <span className={`ask-price ${isBestAsk ? 'best-ask' : ''}`}>
+          {parseFloat(price).toFixed(3)}
+        </span>
+        <span className={`ask-text ${isBestAsk ? 'best-ask' : ''}`}>
+          {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </span>
       </div>
     </div>

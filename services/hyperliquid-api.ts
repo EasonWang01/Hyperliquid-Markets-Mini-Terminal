@@ -58,6 +58,7 @@ class HyperliquidAPI {
       }
       
       const data = await response.json();
+      console.log('OrderBook API Response:', data);
       return {
         coin,
         levels: data.levels || [[], []],
