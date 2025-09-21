@@ -9,6 +9,7 @@ import { OrderBookLevel } from '@/types/hyperliquid';
 export default function OrderBook() {
   const [showSettings, setShowSettings] = useState(false);
   const [maxLevels, setMaxLevels] = useState(10);
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 
   const {
     selectedMarket,
@@ -20,11 +21,15 @@ export default function OrderBook() {
     setError
   } = useTradingStore();
 
-  // Load order book when market changes and poll for updates
+  // Load order book when market changes and set up WebSocket subscription
   useEffect(() => {
-    const loadOrderBook = async () => {
-      if (!selectedMarket) return;
+    console.log('OrderBook useEffect triggered for market:', selectedMarket?.coin);
+    if (!selectedMarket) {
+      console.log('OrderBook: No selected market, skipping subscription');
+      return;
+    }
 
+    const loadOrderBook = async () => {
       setLoading(true);
       try {
         const bookData = await hyperliquidAPI.fetchOrderBook(selectedMarket.coin);
@@ -37,12 +42,49 @@ export default function OrderBook() {
       }
     };
 
+    // Load initial data
     loadOrderBook();
 
-    // Poll for updates every 10 seconds to avoid rate limiting
-    const interval = setInterval(loadOrderBook, 10000);
+    // Set up WebSocket subscription for real-time updates
+    const handleOrderBookUpdate = (data: any) => {
+      console.log('Order book update received:', data);
+      if (data && data.levels && data.coin === selectedMarket.coin) {
+        // Update the order book with real-time data
+        setOrderBook({
+          coin: data.coin,
+          levels: data.levels, // [bids, asks] array
+          time: data.time || Date.now()
+        });
+        setLastUpdateTime(Date.now());
+        console.log('Order book updated with real-time data');
+      }
+    };
 
-    return () => clearInterval(interval);
+    // Subscribe to real-time order book updates
+    const subscribeToOrderBook = async () => {
+      try {
+        await hyperliquidAPI.subscribeToOrderBook(selectedMarket.coin, handleOrderBookUpdate);
+        console.log(`Subscribed to real-time order book for ${selectedMarket.coin}`);
+      } catch (error) {
+        console.error('Failed to subscribe to order book:', error);
+        // Fallback to polling if WebSocket fails
+        const interval = setInterval(loadOrderBook, 10000);
+        return () => clearInterval(interval);
+      }
+    };
+
+    // Add a small delay to ensure WebSocket connection is ready
+    const subscriptionTimeout = setTimeout(() => {
+      console.log('Starting order book subscription after delay...');
+      subscribeToOrderBook();
+    }, 200);
+
+    return () => {
+      clearTimeout(subscriptionTimeout);
+      if (selectedMarket) {
+        hyperliquidAPI.unsubscribeFromOrderBook(selectedMarket.coin);
+      }
+    };
   }, [selectedMarket, setOrderBook, setLoading, setError]);
 
   // Aggregate order book levels based on aggregation setting
@@ -135,7 +177,13 @@ export default function OrderBook() {
       {/* Header */}
       <div className="order-book-header">
         <div className="flex items-center justify-between">
-          <h2 className="order-book-title">Order Book</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="order-book-title">Order Book</h2>
+            <div className="order-book-update-indicator">
+              <div className="update-dot"></div>
+              <span className="update-text">Live</span>
+            </div>
+          </div>
           <div className="order-book-controls">
             {/* Aggregation Selector */}
             <select

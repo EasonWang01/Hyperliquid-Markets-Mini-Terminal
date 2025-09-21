@@ -19,6 +19,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isChartReady, setIsChartReady] = useState(false);
+  const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
 
   const {
     selectedMarket,
@@ -32,10 +33,18 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   useEffect(() => {
     // A selected market and a container ref are required to init the chart
     if (!selectedMarket || !chartContainerRef.current) {
+      console.log('Chart initialization skipped - missing requirements:', {
+        hasSelectedMarket: !!selectedMarket,
+        hasContainerRef: !!chartContainerRef.current
+      });
       return;
     }
 
     console.log('Initializing chart for market:', selectedMarket.coin);
+
+    // Small delay to ensure container is fully mounted
+    const initTimeout = setTimeout(() => {
+      if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
@@ -84,6 +93,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
 
     // Mark chart as ready
     setIsChartReady(true);
+    }, 50); // Close setTimeout
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
@@ -96,6 +106,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(initTimeout);
       console.log('Cleaning up chart for:', selectedMarket.coin);
       window.removeEventListener('resize', handleResize);
       if (chartRef.current) {
@@ -120,7 +131,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     console.log('All raw chart data:', chartData);
 
     const candleData: CandlestickData[] = chartData.map(candle => ({
-      time: candle.time as UTCTimestamp,
+      time: candle.time as UTCTimestamp, // Already converted to seconds in store
       open: candle.open,
       high: candle.high,
       low: candle.low,
@@ -128,7 +139,7 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     }));
 
     const volumeData: HistogramData[] = chartData.map(candle => ({
-      time: candle.time as UTCTimestamp,
+      time: candle.time as UTCTimestamp, // Already converted to seconds in store
       value: candle.volume,
       color: candle.close >= candle.open ? '#10b981' : '#ef4444',
     }));
@@ -160,11 +171,29 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
   const generateCandlestickMockData = () => {
     const mockCandles = [];
     const now = Math.floor(Date.now() / 1000);
-    const intervalSeconds = timeframe === '1m' ? 60 :
-      timeframe === '5m' ? 300 :
-        timeframe === '15m' ? 900 :
-          timeframe === '1h' ? 3600 :
-            timeframe === '4h' ? 14400 : 86400; // 1d
+    
+    // Convert timeframe to seconds
+    const getIntervalSeconds = (tf: string): number => {
+      switch (tf) {
+        case '1m': return 60;
+        case '3m': return 180;
+        case '5m': return 300;
+        case '15m': return 900;
+        case '30m': return 1800;
+        case '1h': return 3600;
+        case '2h': return 7200;
+        case '4h': return 14400;
+        case '8h': return 28800;
+        case '12h': return 43200;
+        case '1d': return 86400;
+        case '3d': return 259200;
+        case '1w': return 604800;
+        case '1M': return 2592000; // 30 days approximation
+        default: return 60;
+      }
+    };
+    
+    const intervalSeconds = getIntervalSeconds(timeframe);
 
     let basePrice = 50000; // Starting price for BTC-like data
 
@@ -302,13 +331,88 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
     return () => clearTimeout(timeoutId);
   }, [chartData, isChartReady, updateChartWithData]);
 
+  // WebSocket subscription for real-time candle updates
+  useEffect(() => {
+    if (!selectedMarket || !isChartReady) return;
+
+    const handleCandleUpdate = (newCandle: any) => {
+      console.log('New candle received:', newCandle);
+      
+      if (newCandle && candlestickSeriesRef.current && newCandle.s === selectedMarket.coin) {
+        // Convert the candle data to the format expected by the chart
+        // Convert milliseconds to seconds for the chart
+        const timestamp = newCandle.t || newCandle.T;
+        const candleData = {
+          time: Math.floor(timestamp / 1000) as UTCTimestamp,
+          open: parseFloat(newCandle.o),
+          high: parseFloat(newCandle.h),
+          low: parseFloat(newCandle.l),
+          close: parseFloat(newCandle.c)
+        };
+
+        console.log('Updating chart with candle data:', candleData);
+
+        // Update the chart with the new candle
+        candlestickSeriesRef.current.update(candleData);
+        
+        // Also update the volume if available
+        if (volumeSeriesRef.current && newCandle.v) {
+          const volumeData = {
+            time: candleData.time, // Already converted to seconds above
+            value: parseFloat(newCandle.v),
+            color: candleData.close >= candleData.open ? '#4ade80' : '#f87171'
+          };
+          volumeSeriesRef.current.update(volumeData);
+          console.log('Updated volume with data:', volumeData);
+        }
+      }
+    };
+
+    // Subscribe to real-time candle updates
+    const subscribeToCandles = async () => {
+      try {
+        await hyperliquidAPI.subscribeToCandles(
+          selectedMarket.coin,
+          timeframe,
+          handleCandleUpdate
+        );
+        setIsWebSocketConnected(true);
+        console.log(`Subscribed to real-time candles for ${selectedMarket.coin} (${timeframe})`);
+      } catch (error) {
+        console.error('Failed to subscribe to candles:', error);
+        setIsWebSocketConnected(false);
+      }
+    };
+
+    // Add a small delay to ensure chart is fully ready
+    const timeoutId = setTimeout(() => {
+      subscribeToCandles();
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (selectedMarket) {
+        hyperliquidAPI.unsubscribeFromCandles(selectedMarket.coin, timeframe);
+        setIsWebSocketConnected(false);
+      }
+    };
+  }, [selectedMarket, timeframe, isChartReady]);
+
   const timeframes = [
     { label: '1m', value: '1m' },
+    { label: '3m', value: '3m' },
     { label: '5m', value: '5m' },
     { label: '15m', value: '15m' },
+    { label: '30m', value: '30m' },
     { label: '1h', value: '1h' },
+    { label: '2h', value: '2h' },
     { label: '4h', value: '4h' },
+    { label: '8h', value: '8h' },
+    { label: '12h', value: '12h' },
     { label: '1d', value: '1d' },
+    { label: '3d', value: '3d' },
+    { label: '1w', value: '1w' },
+    { label: '1M', value: '1M' },
   ];
 
   return (
@@ -327,6 +431,14 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
 
         {/* Timeframe Controls */}
         <div className="timeframe-controls">
+          {/* Connection Status */}
+          <div className={`connection-status ${isWebSocketConnected ? 'connected' : 'disconnected'}`}>
+            <div className="status-dot"></div>
+            <span className="status-text">
+              {isWebSocketConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
+          
           <button
             onClick={() => setRefreshKey(prev => prev + 1)}
             disabled={isLoadingData}
@@ -350,7 +462,10 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       <div className="relative">
         {!selectedMarket ? (
           <div className="flex items-center justify-center" style={{ height }}>
-            <p className="text-gray-400">Select a market to view chart</p>
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+              <p className="text-gray-400">Loading markets...</p>
+            </div>
           </div>
         ) : (
           <div

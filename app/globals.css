@@ -241,6 +241,32 @@ input:focus, select:focus, textarea:focus {
   color: white;
 }
 
+.order-book-update-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  color: #4ade80;
+}
+
+.update-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.update-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #4ade80;
+}
+
 .order-book-content {
   padding: 16px;
 }
@@ -485,6 +511,18 @@ input:focus, select:focus, textarea:focus {
   font-size: 18px;
   font-weight: 600;
   color: white;
+}
+
+.trades-update-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 4px;
+  font-size: 10px;
+  color: #4ade80;
 }
 
 .trades-controls {
@@ -936,6 +974,58 @@ input:focus, select:focus, textarea:focus {
   gap: 8px;
 }
 
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.connection-status.connected {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.connection-status.disconnected {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-status.connected .status-dot {
+  background-color: #4ade80;
+}
+
+.connection-status.disconnected .status-dot {
+  background-color: #f87171;
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .timeframe-button {
   padding: 8px 16px;
   background-color: #374151;
@@ -994,10 +1084,24 @@ input:focus, select:focus, textarea:focus {
   .timeframe-controls {
     justify-content: center;
     flex-wrap: wrap;
+    gap: 4px;
   }
   
   .timeframe-button {
     flex: 1;
     min-width: auto;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeframe-controls {
+    gap: 2px;
+  }
+  
+  .timeframe-button {
+    padding: 4px 8px;
+    font-size: 11px;
   }
 }

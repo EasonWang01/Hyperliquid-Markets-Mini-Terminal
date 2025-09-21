@@ -8,6 +8,7 @@ import { Trade } from '@/types/hyperliquid';
 
 export default function TradesList() {
   const [maxTrades, setMaxTrades] = useState(30);
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 
   const {
     selectedMarket,
@@ -17,11 +18,15 @@ export default function TradesList() {
     setError
   } = useTradingStore();
 
-  // Load trades when market changes and poll for updates
+  // Load trades when market changes and set up WebSocket subscription
   useEffect(() => {
-    const loadTrades = async () => {
-      if (!selectedMarket) return;
+    console.log('TradesList useEffect triggered for market:', selectedMarket?.coin);
+    if (!selectedMarket) {
+      console.log('TradesList: No selected market, skipping subscription');
+      return;
+    }
 
+    const loadTrades = async () => {
       setLoading(true);
       try {
         const tradesData = await hyperliquidAPI.fetchTrades(selectedMarket.coin);
@@ -35,12 +40,54 @@ export default function TradesList() {
       }
     };
 
+    // Load initial data
     loadTrades();
 
-    // Poll for updates every 15 seconds to avoid rate limiting
-    const interval = setInterval(loadTrades, 15000);
+    // Set up WebSocket subscription for real-time updates
+    const handleTradeUpdate = (data: any) => {
+      console.log('Trade update received:', data);
+      if (data && Array.isArray(data)) {
+        // Add new trades to the list (most recent first)
+        data.forEach(trade => {
+          if (trade.coin === selectedMarket.coin) {
+            addTrade(trade);
+            setLastUpdateTime(Date.now());
+            console.log('Added new trade:', trade);
+          }
+        });
+      } else if (data && data.coin === selectedMarket.coin) {
+        // Single trade update
+        addTrade(data);
+        setLastUpdateTime(Date.now());
+        console.log('Added single trade:', data);
+      }
+    };
 
-    return () => clearInterval(interval);
+    // Subscribe to real-time trade updates
+    const subscribeToTrades = async () => {
+      try {
+        await hyperliquidAPI.subscribeToTrades(selectedMarket.coin, handleTradeUpdate);
+        console.log(`Subscribed to real-time trades for ${selectedMarket.coin}`);
+      } catch (error) {
+        console.error('Failed to subscribe to trades:', error);
+        // Fallback to polling if WebSocket fails
+        const interval = setInterval(loadTrades, 15000);
+        return () => clearInterval(interval);
+      }
+    };
+
+    // Add a small delay to ensure WebSocket connection is ready
+    const subscriptionTimeout = setTimeout(() => {
+      console.log('Starting trades subscription after delay...');
+      subscribeToTrades();
+    }, 200);
+
+    return () => {
+      clearTimeout(subscriptionTimeout);
+      if (selectedMarket) {
+        hyperliquidAPI.unsubscribeFromTrades(selectedMarket.coin);
+      }
+    };
   }, [selectedMarket, addTrade, setLoading, setError]);
 
   const displayTrades = trades.slice(0, maxTrades);
@@ -70,7 +117,13 @@ export default function TradesList() {
       {/* Header */}
       <div className="trades-header">
         <div className="flex items-center justify-between">
-          <h2 className="trades-title">Recent Trades</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="trades-title">Recent Trades</h2>
+            <div className="trades-update-indicator">
+              <div className="update-dot"></div>
+              <span className="update-text">Live</span>
+            </div>
+          </div>
           <div className="trades-controls">
             <select
               value={maxTrades}

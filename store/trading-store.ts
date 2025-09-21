@@ -99,16 +99,22 @@ export const useTradingStore = create<TradingState>()(
       
       setCandles: (candles) => set({ candles }),
       
-      updateChartData: (candles) => set({
-        chartData: candles.map(candle => ({
+      updateChartData: (candles) => {
+        console.log('updateChartData called with:', candles.length, 'candles');
+        console.log('Sample raw candle:', candles[0]);
+        
+        const transformedData = candles.map(candle => ({
           time: Math.floor(candle.t / 1000) as any, // Convert ms to seconds for UTCTimestamp
           open: parseFloat(candle.o),
           high: parseFloat(candle.h),
           low: parseFloat(candle.l),
           close: parseFloat(candle.c),
           volume: parseFloat(candle.v)
-        }))
-      }),
+        }));
+        
+        console.log('Sample transformed candle:', transformedData[0]);
+        set({ chartData: transformedData });
+      },
       
       setUserState: (userState) => set({ userState }),
       
