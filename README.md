@@ -1,4 +1,4 @@
-# 🚀 Hyperliquid Terminal
+# Hyperliquid Markets Mini-Terminal
 
 A mobile-first Progressive Web App (PWA) UI terminal for Hyperliquid. Built with modern web technologies for optimal performance and user experience.
 
@@ -189,16 +189,6 @@ The app integrates with the Hyperliquid API for:
 - Keyboard navigation support
 - Screen reader compatibility
 - High contrast support
-
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env.local` file for local development:
-
-```env
-NEXT_PUBLIC_HYPERLIQUID_API_URL=https://api.hyperliquid.xyz
-NEXT_PUBLIC_WS_URL=wss://api.hyperliquid.xyz/ws
-```
 
 ### PWA Configuration
 The app is configured as a PWA with:
