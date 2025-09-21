@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { Menu, User } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Menu, User, Search, Star } from 'lucide-react';
 import MarketSelector from '@/components/MarketSelector';
 import PriceChart from '@/components/PriceChart';
 import OrderBook from '@/components/OrderBook';
@@ -14,6 +14,9 @@ export default function Home() {
   const [showMarketSelector, setShowMarketSelector] = useState(false);
   const [showAccountLookup, setShowAccountLookup] = useState(false);
   const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'trades'>('chart');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const { 
     selectedMarket, 
@@ -59,6 +62,59 @@ export default function Home() {
     }
   }, [error, clearError]);
 
+  // Filter markets based on search term
+  const filteredMarkets = useMemo(() => {
+    if (!searchTerm.trim()) return markets.slice(0, 10); // Show first 10 by default
+    
+    const term = searchTerm.toLowerCase();
+    return markets.filter(market => 
+      market.coin.toLowerCase().includes(term) ||
+      market.name.toLowerCase().includes(term)
+    ).slice(0, 10);
+  }, [markets, searchTerm]);
+
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowSearchResults(value.trim().length > 0);
+  };
+
+  // Handle market selection from search results
+  const handleMarketSelect = (market: any) => {
+    setSelectedMarket(market);
+    setSearchTerm('');
+    setShowSearchResults(false);
+  };
+
+  // Toggle favorite
+  const toggleFavorite = (coin: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(coin)) {
+        newFavorites.delete(coin);
+      } else {
+        newFavorites.add(coin);
+      }
+      return newFavorites;
+    });
+  };
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.market-search-wrapper')) {
+        setShowSearchResults(false);
+      }
+    };
+
+    if (showSearchResults) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSearchResults]);
+
   return (
     <main className="min-h-screen bg-gray-900">
       {/* Header */}
@@ -80,10 +136,62 @@ export default function Home() {
               </option>
               {markets.map((m) => (
                 <option key={m.coin} value={m.coin} className="market-select-option">
-                  {m.coin}
+                  {m.coin} x{m.maxLeverage}
                 </option>
               ))}
             </select>
+          </div>
+          
+          {/* Searchable Market List */}
+          <div className="market-search-wrapper">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search markets..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={() => setShowSearchResults(searchTerm.trim().length > 0)}
+                className="market-search-input"
+              />
+            </div>
+            
+            {/* Search Results Dropdown */}
+            {showSearchResults && (
+              <div className="market-search-results">
+                <div className="search-results-header">
+                  <span className="text-xs text-gray-400">
+                    {filteredMarkets.length} markets
+                  </span>
+                </div>
+                {filteredMarkets.map((market) => (
+                  <button
+                    key={market.coin}
+                    onClick={() => handleMarketSelect(market)}
+                    className="market-search-item"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(market.coin);
+                        }}
+                        className={`favorite-btn ${favorites.has(market.coin) ? 'favorited' : ''}`}
+                      >
+                        <Star className="w-3 h-3" />
+                      </button>
+                      <div className="flex-1">
+                        <div className="market-symbol">{market.coin}</div>
+                        <div className="market-name">{market.name}</div>
+                      </div>
+                      <div className="leverage-badge">
+                        {market.maxLeverage}x
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>

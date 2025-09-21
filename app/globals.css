@@ -903,10 +903,15 @@ input:focus, select:focus, textarea:focus {
 
 .market-select-section {
   padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .market-select-wrapper {
   max-width: 200px;
+  flex: 0 0 auto;
 }
 
 .market-select-dropdown {
@@ -936,6 +941,135 @@ input:focus, select:focus, textarea:focus {
   background-color: #374151;
   color: white;
   padding: 8px 12px;
+}
+
+/* Market Search Styles */
+.market-search-wrapper {
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+
+.market-search-input {
+  width: 100%;
+  background-color: #374151;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  padding: 12px 16px 12px 40px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.market-search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.market-search-input:hover {
+  background-color: #4b5563;
+}
+
+.market-search-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Search Results */
+.market-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-results-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #374151;
+  background: #374151;
+}
+
+.market-search-item {
+  width: 100%;
+  padding: 12px;
+  text-align: left;
+  background: transparent;
+  color: white;
+  border-bottom: 1px solid #374151;
+  transition: all 0.2s ease;
+}
+
+.market-search-item:hover {
+  background: #374151;
+}
+
+.market-search-item:last-child {
+  border-bottom: none;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.favorite-btn:hover {
+  color: #fbbf24;
+}
+
+.favorite-btn.favorited {
+  color: #fbbf24;
+}
+
+.market-symbol {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 2px;
+}
+
+.market-name {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.leverage-badge {
+  background: #10b981;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .market-select-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .market-select-wrapper {
+    max-width: none;
+  }
+  
+  .market-search-wrapper {
+    max-width: none;
+  }
 }
 
 /* Chart Controls Styles */
