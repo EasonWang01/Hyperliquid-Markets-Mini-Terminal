@@ -344,6 +344,7 @@ input:focus, select:focus, textarea:focus {
   font-family: 'Courier New', monospace;
   font-weight: 500;
   color: #4ade80;
+  text-align: left;
 }
 
 .bid-text.best-bid {
@@ -408,6 +409,7 @@ input:focus, select:focus, textarea:focus {
   font-family: 'Courier New', monospace;
   font-weight: 500;
   color: #f87171;
+  text-align: right;
 }
 
 .ask-text.best-ask {
@@ -418,7 +420,7 @@ input:focus, select:focus, textarea:focus {
   font-family: 'Courier New', monospace;
   font-weight: 600;
   color: #fca5a5;
-  text-align: right;
+  text-align: left;
 }
 
 .ask-price.best-ask {
@@ -1301,4 +1303,12 @@ input:focus, select:focus, textarea:focus {
     padding: 4px 8px;
     font-size: 11px;
   }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
 }
