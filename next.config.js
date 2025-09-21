@@ -101,7 +101,6 @@ const nextConfig = {
   // Enable experimental features for PWA and performance
   experimental: {
     webpackBuildWorker: true,
-    optimizeCss: true,
     optimizePackageImports: ['lucide-react'],
   },
 };
