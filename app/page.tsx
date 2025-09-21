@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Menu, User, Search, Star } from 'lucide-react';
-import MarketSelector from '@/components/MarketSelector';
 import PriceChart from '@/components/PriceChart';
 import OrderBook from '@/components/OrderBook';
 import TradesList from '@/components/TradesList';
@@ -11,34 +10,32 @@ import { useTradingStore } from '@/store/trading-store';
 import { hyperliquidAPI } from '@/services/hyperliquid-api';
 
 export default function Home() {
-  const [showMarketSelector, setShowMarketSelector] = useState(false);
   const [showAccountLookup, setShowAccountLookup] = useState(false);
-  const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'trades'>('chart');
   const [searchTerm, setSearchTerm] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  const { 
-    selectedMarket, 
-    markets, 
-    error, 
-    clearError, 
-    setMarkets, 
-    setSelectedMarket, 
-    setLoading, 
-    setError 
+  const {
+    selectedMarket,
+    markets,
+    error,
+    clearError,
+    setMarkets,
+    setSelectedMarket,
+    setLoading,
+    setError
   } = useTradingStore();
 
   // Load markets once on app start
   useEffect(() => {
     const loadMarkets = async () => {
       if (markets.length > 0) return; // Already loaded
-      
+
       setLoading(true);
       try {
         const fetchedMarkets = await hyperliquidAPI.fetchMarkets();
         setMarkets(fetchedMarkets);
-        
+
         // Auto-select first market if none selected
         if (!selectedMarket && fetchedMarkets.length > 0) {
           setSelectedMarket(fetchedMarkets[0]);
@@ -65,9 +62,9 @@ export default function Home() {
   // Filter markets based on search term
   const filteredMarkets = useMemo(() => {
     if (!searchTerm.trim()) return markets.slice(0, 10); // Show first 10 by default
-    
+
     const term = searchTerm.toLowerCase();
-    return markets.filter(market => 
+    return markets.filter(market =>
       market.coin.toLowerCase().includes(term) ||
       market.name.toLowerCase().includes(term)
     ).slice(0, 10);
@@ -122,26 +119,36 @@ export default function Home() {
         {/* Market Select Control */}
         <div className="market-select-section">
           <div className="market-select-wrapper">
-            <select
-              aria-label="Select market"
-              value={selectedMarket?.coin ?? ''}
-              onChange={(e) => {
-                const next = markets.find((m) => m.coin === e.target.value);
-                if (next) setSelectedMarket(next);
-              }}
-              className="market-select-dropdown"
-            >
-              <option value="" disabled>
-                {markets.length > 0 ? 'Select a market…' : 'Loading markets…'}
-              </option>
-              {markets.map((m) => (
-                <option key={m.coin} value={m.coin} className="market-select-option">
-                  {m.coin} x{m.maxLeverage}
+            <div className="market-select-button">
+              <div className="market-select-content">
+                <div className="market-info">
+                  <div className="market-symbol">
+                    {selectedMarket ? `${selectedMarket.coin} x${selectedMarket.maxLeverage}` : 'Select Market'}
+                  </div>
+                </div>
+                <div className="dropdown-arrow">▼</div>
+              </div>
+              <select
+                aria-label="Select market"
+                value={selectedMarket?.coin ?? ''}
+                onChange={(e) => {
+                  const next = markets.find((m) => m.coin === e.target.value);
+                  if (next) setSelectedMarket(next);
+                }}
+                className="market-select-dropdown"
+              >
+                <option value="" disabled>
+                  {markets.length > 0 ? 'Select a market…' : 'Loading markets…'}
                 </option>
-              ))}
-            </select>
+                {markets.map((m) => (
+                  <option key={m.coin} value={m.coin} className="market-select-option">
+                    {m.coin} x{m.maxLeverage}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          
+
           {/* Searchable Market List */}
           <div className="market-search-wrapper">
             <div className="relative">
@@ -155,7 +162,7 @@ export default function Home() {
                 className="market-search-input"
               />
             </div>
-            
+
             {/* Search Results Dropdown */}
             {showSearchResults && (
               <div className="market-search-results">
@@ -211,19 +218,12 @@ export default function Home() {
         */}
         <div className="grid grid-cols-12 gap-4">
           {/* Main Content Area (Chart) */}
-          <div className={`col-span-12 lg:col-span-8 space-y-4 ${activeTab !== 'chart' && 'hidden lg:block'}`}>
-            <PriceChart height={400} />
-          </div>
+          <PriceChart height={400} />
 
           {/* Sidebar Content Area (OrderBook & Trades) */}
           <div className="col-span-12 lg:col-span-4 space-y-4">
-            {/* Content - Always mount components but hide with CSS */}
-            <div className={`${activeTab !== 'orderbook' && 'hidden'} lg:block`}>
-              <OrderBook />
-            </div>
-            <div className={`${activeTab !== 'trades' && 'hidden'} lg:block`}>
-              <TradesList />
-            </div>
+            <OrderBook />
+            <TradesList />
           </div>
         </div>
 
@@ -242,15 +242,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      {showMarketSelector && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md">
-            <MarketSelector onClose={() => setShowMarketSelector(false)} />
-          </div>
-        </div>
-      )}
 
       <AccountLookup
         isOpen={showAccountLookup}
