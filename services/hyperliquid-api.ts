@@ -19,7 +19,10 @@ class HyperliquidAPI {
         },
         body: JSON.stringify({
           type: 'meta'
-        })
+        }),
+        // Add performance optimizations
+        cache: 'force-cache',
+        keepalive: true
       });
       
       if (!response.ok) {

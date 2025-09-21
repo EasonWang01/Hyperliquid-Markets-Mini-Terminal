@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, memo } from 'react';
 import { Settings } from 'lucide-react';
 import { useTradingStore } from '@/store/trading-store';
 import { hyperliquidAPI } from '@/services/hyperliquid-api';
 import { OrderBookLevel } from '@/types/hyperliquid';
 
-export default function OrderBook() {
+const OrderBook = memo(function OrderBook() {
   const [showSettings, setShowSettings] = useState(false);
   const [maxLevels, setMaxLevels] = useState(10);
 
@@ -268,7 +268,9 @@ export default function OrderBook() {
       </div>
     </div>
   );
-}
+});
+
+export default OrderBook;
 
 interface BidRowProps {
   price: string;
@@ -279,7 +281,7 @@ interface BidRowProps {
   isBestBid?: boolean;
 }
 
-function BidRow({ price, size, total, depthPercent, decimals, isBestBid = false }: BidRowProps) {
+const BidRow = memo(function BidRow({ price, size, total, depthPercent, decimals, isBestBid = false }: BidRowProps) {
   return (
     <div className={`bid-row ${isBestBid ? 'best-bid' : ''}`}>
       <div
@@ -297,7 +299,7 @@ function BidRow({ price, size, total, depthPercent, decimals, isBestBid = false 
       </div>
     </div>
   );
-}
+});
 
 interface AskRowProps {
   price: string;
@@ -308,7 +310,7 @@ interface AskRowProps {
   isBestAsk?: boolean;
 }
 
-function AskRow({ price, size, total, depthPercent, decimals, isBestAsk = false }: AskRowProps) {
+const AskRow = memo(function AskRow({ price, size, total, depthPercent, decimals, isBestAsk = false }: AskRowProps) {
   return (
     <div className={`ask-row ${isBestAsk ? 'best-ask' : ''}`}>
       <div
@@ -326,4 +328,4 @@ function AskRow({ price, size, total, depthPercent, decimals, isBestAsk = false 
       </div>
     </div>
   );
-}
+});

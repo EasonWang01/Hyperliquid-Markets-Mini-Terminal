@@ -78,9 +78,15 @@ export const useTradingStore = create<TradingState>()(
       
       setOrderBook: (orderBook) => set({ orderBook }),
       
-      addTrade: (trade) => set((state) => ({
-        trades: [trade, ...state.trades.slice(0, 99)] // Keep last 100 trades
-      })),
+      addTrade: (trade) => set((state) => {
+        // Avoid duplicate trades by checking hash
+        const existingTrade = state.trades.find(t => t.hash === trade.hash);
+        if (existingTrade) return state;
+        
+        return {
+          trades: [trade, ...state.trades.slice(0, 99)] // Keep last 100 trades
+        };
+      }),
       
       setTrades: (trades) => set({ trades }),
       

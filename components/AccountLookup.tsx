@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { Camera, Wallet, Search, X, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import QrScanner from 'qr-scanner';
 import { useTradingStore } from '@/store/trading-store';
@@ -11,7 +11,7 @@ interface AccountLookupProps {
   onClose: () => void;
 }
 
-export default function AccountLookup({ isOpen, onClose }: AccountLookupProps) {
+const AccountLookup = memo(function AccountLookup({ isOpen, onClose }: AccountLookupProps) {
   const [address, setAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -284,4 +284,6 @@ export default function AccountLookup({ isOpen, onClose }: AccountLookupProps) {
       </div>
     </div>
   );
-}
+});
+
+export default AccountLookup;

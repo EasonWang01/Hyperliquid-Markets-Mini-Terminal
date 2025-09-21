@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { createChart, IChartApi, UTCTimestamp, CandlestickData, HistogramData, CrosshairMode, CandlestickSeries, HistogramSeries, ColorType } from 'lightweight-charts';
 import { useTradingStore } from '@/store/trading-store';
 import { hyperliquidAPI } from '@/services/hyperliquid-api';
@@ -9,7 +9,7 @@ interface PriceChartProps {
   height?: number;
 }
 
-export default function PriceChart({ height = 300 }: PriceChartProps) {
+const PriceChart = memo(function PriceChart({ height = 300 }: PriceChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const candlestickSeriesRef = useRef<any>(null);
@@ -409,4 +409,6 @@ export default function PriceChart({ height = 300 }: PriceChartProps) {
       </div>
     </div>
   );
-}
+});
+
+export default PriceChart;

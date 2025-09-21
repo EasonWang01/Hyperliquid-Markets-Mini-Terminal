@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { useTradingStore } from '@/store/trading-store';
 import { hyperliquidAPI } from '@/services/hyperliquid-api';
 import { Trade } from '@/types/hyperliquid';
 
-export default function TradesList() {
+const TradesList = memo(function TradesList() {
   const [maxTrades, setMaxTrades] = useState(30);
 
   const {
@@ -168,14 +168,16 @@ export default function TradesList() {
       </div>
     </div>
   );
-}
+});
+
+export default TradesList;
 
 interface TradeRowProps {
   trade: Trade;
   decimals: number;
 }
 
-function TradeRow({ trade, decimals }: TradeRowProps) {
+const TradeRow = memo(function TradeRow({ trade, decimals }: TradeRowProps) {
   const isBuy = trade.side === 'B';
 
   const formatTime = (timestamp: number) => {
@@ -231,9 +233,9 @@ function TradeRow({ trade, decimals }: TradeRowProps) {
       </div>
     </div>
   );
-}
+});
 
-export function TradeFlash({ trade }: { trade: Trade }) {
+export const TradeFlash = memo(function TradeFlash({ trade }: { trade: Trade }) {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
@@ -255,4 +257,4 @@ export function TradeFlash({ trade }: { trade: Trade }) {
       </div>
     </div>
   );
-}
+});

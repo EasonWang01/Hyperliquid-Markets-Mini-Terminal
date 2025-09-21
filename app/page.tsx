@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo, lazy, Suspense } from 'react';
 import { Menu, User, Search, Star } from 'lucide-react';
-import PriceChart from '@/components/PriceChart';
-import OrderBook from '@/components/OrderBook';
-import TradesList from '@/components/TradesList';
-import AccountLookup from '@/components/AccountLookup';
 import { useTradingStore } from '@/store/trading-store';
 import { hyperliquidAPI } from '@/services/hyperliquid-api';
+
+const PriceChart = lazy(() => import('@/components/PriceChart'));
+const OrderBook = lazy(() => import('@/components/OrderBook'));
+const TradesList = lazy(() => import('@/components/TradesList'));
+const AccountLookup = lazy(() => import('@/components/AccountLookup'));
 
 export default function Home() {
   const [showAccountLookup, setShowAccountLookup] = useState(false);
@@ -66,19 +67,19 @@ export default function Home() {
     ).slice(0, 10);
   }, [markets, searchTerm]);
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useMemo(() => (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
     setShowSearchResults(value.trim().length > 0);
-  };
+  }, []);
 
-  const handleMarketSelect = (market: any) => {
+  const handleMarketSelect = useMemo(() => (market: any) => {
     setSelectedMarket(market);
     setSearchTerm('');
     setShowSearchResults(false);
-  };
+  }, [setSelectedMarket]);
 
-  const toggleFavorite = (coin: string) => {
+  const toggleFavorite = useMemo(() => (coin: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
       if (newFavorites.has(coin)) {
@@ -88,7 +89,7 @@ export default function Home() {
       }
       return newFavorites;
     });
-  };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -197,11 +198,17 @@ export default function Home() {
 
       <div className="container mx-auto p-4 max-w-7xl">
         <div className="grid grid-cols-12 gap-4">
-          <PriceChart height={400} />
+          <Suspense fallback={<div className="col-span-12 lg:col-span-8 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center" style={{ height: 400 }}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>}>
+            <PriceChart height={400} />
+          </Suspense>
 
           <div className="col-span-12 lg:col-span-4 space-y-4">
-            <OrderBook />
-            <TradesList />
+            <Suspense fallback={<div className="bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center" style={{ height: 200 }}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>}>
+              <OrderBook />
+            </Suspense>
+            <Suspense fallback={<div className="bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center" style={{ height: 200 }}><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div></div>}>
+              <TradesList />
+            </Suspense>
           </div>
         </div>
 
@@ -219,10 +226,12 @@ export default function Home() {
         </div>
       </div>
 
-      <AccountLookup
-        isOpen={showAccountLookup}
-        onClose={() => setShowAccountLookup(false)}
-      />
+      <Suspense fallback={null}>
+        <AccountLookup
+          isOpen={showAccountLookup}
+          onClose={() => setShowAccountLookup(false)}
+        />
+      </Suspense>
     </main>
   );
 }

@@ -2,7 +2,12 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial']
+})
 
 export const metadata: Metadata = {
   title: 'Hyperliquid Terminal',
@@ -26,6 +31,13 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
     apple: '/icon.svg',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: undefined,
   },
 }
 
@@ -51,6 +63,11 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/icon.svg" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.hyperliquid.xyz" />
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="color-scheme" content="dark" />
       </head>
       <body className={inter.className}>
         {children} 

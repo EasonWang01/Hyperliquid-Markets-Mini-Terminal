@@ -4,6 +4,11 @@
   margin: 0;
 }
 
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
 html,
 body {
   max-width: 100vw;
@@ -16,6 +21,8 @@ body {
   background-color: #1a1a1a;
   color: #ffffff;
   line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -46,12 +53,18 @@ button {
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.1s ease, background-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform;
 }
 
 button:active {
   transform: scale(0.98);
+}
+
+button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
 }
 
 /* Input fields */
@@ -487,6 +500,37 @@ input:focus, select:focus, textarea:focus {
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes flashPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Performance optimizations for animations */
+.animate-spin {
+  animation: spin 1s linear infinite;
+  will-change: transform;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: opacity;
 }
 
 .order-book-empty {
