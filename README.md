@@ -7,6 +7,15 @@ A mobile-first Progressive Web App (PWA) UI terminal for Hyperliquid. Built with
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 ![PWA](https://img.shields.io/badge/PWA-Enabled-purple)
 
+## Screenshots
+<img width="349" height="615" alt="截圖 2025-09-21 下午3 28 05" src="https://github.com/user-attachments/assets/6975e0de-6ccb-4e02-82ba-e9a1b9a410c8" />
+<img width="383" height="600" alt="截圖 2025-09-21 下午3 28 12" src="https://github.com/user-attachments/assets/97f7f8bc-425a-41e6-84fc-9b1e501d801b" />
+<img width="372" height="541" alt="截圖 2025-09-21 下午3 28 18" src="https://github.com/user-attachments/assets/04caa1e1-ccb9-4192-be3d-8e83e02c9332" />
+
+
+## Demo
+https://trade-mini-terminal-idft4corw.vercel.app/
+
 ## ✨ Features
 
 ### 📱 Mobile-First Design
