@@ -64,7 +64,6 @@ class HyperliquidAPI {
       }
       
       const data = await response.json();
-      console.log('OrderBook API Response:', data);
       return {
         coin,
         levels: data.levels || [[], []],
@@ -103,7 +102,6 @@ class HyperliquidAPI {
 
   // Test method to try different API approaches
   async testCandleAPI(coin: string): Promise<any> {
-    console.log('Testing candle API with correct format...');
     
     // Use the exact format from the API docs
     const endTime = Date.now();
@@ -123,17 +121,11 @@ class HyperliquidAPI {
           }
         })
       });
-      console.log('Test API status:', response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log('Test API response:', data);
         return data;
-      } else {
-        const errorText = await response.text();
-        console.log('Test API error response:', errorText);
       }
     } catch (error) {
-      console.log('Test API failed:', error);
     }
     
     return null;
@@ -159,7 +151,6 @@ class HyperliquidAPI {
         }
       };
       
-      console.log('Fetching candles with request:', requestBody);
       
       const response = await fetch(`${this.baseUrl}/info`, {
         method: 'POST',
@@ -169,7 +160,6 @@ class HyperliquidAPI {
         body: JSON.stringify(requestBody)
       });
       
-      console.log('API response status:', response.status);
       
       if (!response.ok) {
         const errorText = await response.text();
@@ -178,8 +168,6 @@ class HyperliquidAPI {
       }
       
       const data = await response.json();
-      console.log('API response data:', data);
-      console.log('Sample candle from API:', data[0]);
       return data || [];
     } catch (error) {
       console.error('Error fetching candles:', error);
@@ -219,8 +207,6 @@ class HyperliquidAPI {
         this.ws = new WebSocket(this.wsUrl);
         
         this.ws.onopen = () => {
-          console.log('WebSocket connected to Hyperliquid');
-          console.log('Current subscriptions:', Array.from(this.subscriptions.keys()));
           this.reconnectAttempts = 0;
           resolve();
         };
@@ -235,7 +221,6 @@ class HyperliquidAPI {
         };
         
         this.ws.onclose = (event) => {
-          console.log('WebSocket connection closed:', event.code, event.reason);
           this.ws = null;
           this.attemptReconnect();
         };
@@ -251,10 +236,8 @@ class HyperliquidAPI {
   }
 
   private handleWebSocketMessage(message: WebSocketMessage) {
-    console.log('WebSocket message received:', message);
     
     if (message.channel === 'subscriptionResponse') {
-      console.log('Subscription response:', message.data);
       return;
     }
     
@@ -269,7 +252,6 @@ class HyperliquidAPI {
   }
 
   private handleOrderBookUpdate(data: any) {
-    console.log('Processing order book update:', data);
     
     // Map the WebSocket data to our expected format
     const mappedData = {
@@ -285,7 +267,6 @@ class HyperliquidAPI {
   }
 
   private handleTradeUpdate(data: any) {
-    console.log('Processing trade update:', data);
     
     // Map the WebSocket data to our expected format
     const mappedData = data.map((trade: any) => ({
@@ -306,7 +287,6 @@ class HyperliquidAPI {
   }
 
   private handleCandleUpdate(data: any) {
-    console.log('Processing candle update:', data);
     
     // Map the WebSocket data to our expected format
     const mappedData = {
@@ -334,12 +314,10 @@ class HyperliquidAPI {
     }
     
     this.reconnectAttempts++;
-    console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
     
     setTimeout(async () => {
       try {
         await this.connectWebSocket();
-        // Resubscribe to all active subscriptions
         this.resubscribeAll();
       } catch (error) {
         console.error('Reconnection failed:', error);
@@ -348,8 +326,6 @@ class HyperliquidAPI {
   }
 
   private resubscribeAll() {
-    console.log('Resubscribing to all active subscriptions...');
-    console.log('Active subscriptions:', Array.from(this.subscriptions.keys()));
     this.subscriptions.forEach((callback, key) => {
       const [type, coin] = key.split(':');
       if (type === 'candle') {
@@ -365,7 +341,6 @@ class HyperliquidAPI {
 
   private async ensureWebSocketConnection(): Promise<void> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.log('WebSocket not ready, connecting...');
       await this.connectWebSocket();
       // Add a small delay to ensure connection is fully established
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -373,12 +348,9 @@ class HyperliquidAPI {
   }
 
   private sendSubscription(request: SubscriptionRequest) {
-    console.log('sendSubscription called with:', request);
-    console.log('WebSocket state:', this.ws?.readyState);
     
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       const message = JSON.stringify(request);
-      console.log('Sending WebSocket message:', message);
       this.ws.send(message);
     } else {
       console.error('WebSocket not connected - readyState:', this.ws?.readyState);
@@ -386,7 +358,6 @@ class HyperliquidAPI {
       setTimeout(() => {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
           const message = JSON.stringify(request);
-          console.log('Retrying WebSocket message:', message);
           this.ws.send(message);
         } else {
           console.error('WebSocket still not ready after retry');
@@ -419,11 +390,9 @@ class HyperliquidAPI {
     };
     
     this.sendSubscription(request);
-    console.log(`Subscribed to candles for ${coin} with interval ${interval}`);
   }
 
   async subscribeToTrades(coin: string, callback: (data: any) => void) {
-    console.log(`subscribeToTrades called for ${coin}`);
     await this.ensureWebSocketConnection();
     
     const subscriptionKey = `trades:${coin}`;
@@ -437,13 +406,10 @@ class HyperliquidAPI {
       }
     };
     
-    console.log('Sending trades subscription request:', request);
     this.sendSubscription(request);
-    console.log(`Subscribed to trades for ${coin}`);
   }
 
   async subscribeToOrderBook(coin: string, callback: (data: any) => void) {
-    console.log(`subscribeToOrderBook called for ${coin}`);
     await this.ensureWebSocketConnection();
     
     const subscriptionKey = `l2Book:${coin}`;
@@ -457,27 +423,22 @@ class HyperliquidAPI {
       }
     };
     
-    console.log('Sending order book subscription request:', request);
     this.sendSubscription(request);
-    console.log(`Subscribed to order book for ${coin}`);
   }
 
   unsubscribeFromCandles(coin: string, interval: string) {
     const subscriptionKey = `candle:${coin}:${interval}`;
     this.subscriptions.delete(subscriptionKey);
-    console.log(`Unsubscribed from candles for ${coin} with interval ${interval}`);
   }
 
   unsubscribeFromTrades(coin: string) {
     const subscriptionKey = `trades:${coin}`;
     this.subscriptions.delete(subscriptionKey);
-    console.log(`Unsubscribed from trades for ${coin}`);
   }
 
   unsubscribeFromOrderBook(coin: string) {
     const subscriptionKey = `l2Book:${coin}`;
     this.subscriptions.delete(subscriptionKey);
-    console.log(`Unsubscribed from order book for ${coin}`);
   }
 
   disconnect() {
@@ -486,7 +447,6 @@ class HyperliquidAPI {
       this.ws = null;
     }
     this.subscriptions.clear();
-    console.log('WebSocket disconnected');
   }
 
 }

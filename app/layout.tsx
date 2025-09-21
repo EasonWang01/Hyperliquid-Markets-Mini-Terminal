@@ -53,7 +53,7 @@ export default function RootLayout({
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
       </head>
       <body className={inter.className}>
-        {children}
+        {children} 
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -61,10 +61,8 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
                     .then(function(registration) {
-                      console.log('SW registered: ', registration);
                     })
                     .catch(function(registrationError) {
-                      console.log('SW registration failed: ', registrationError);
                     });
                 });
               }

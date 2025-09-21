@@ -15,16 +15,13 @@ const API_ENDPOINTS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => {
-        console.log('Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       }),
       caches.open(API_CACHE_NAME)
     ]).then(() => {
-      console.log('Service Worker installed');
       return self.skipWaiting();
     })
   );
@@ -32,19 +29,16 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      console.log('Service Worker activated');
       return self.clients.claim();
     })
   );
@@ -119,7 +113,6 @@ async function networkFirstStrategy(request, cacheName) {
     
     return networkResponse;
   } catch (error) {
-    console.log('Network failed, trying cache:', error);
     
     // Fallback to cache
     const cache = await caches.open(cacheName);
@@ -140,7 +133,6 @@ async function networkFirstStrategy(request, cacheName) {
 
 // Background sync for offline actions
 self.addEventListener('sync', (event) => {
-  console.log('Background sync:', event.tag);
   
   if (event.tag === 'background-sync') {
     event.waitUntil(doBackgroundSync());
@@ -149,14 +141,12 @@ self.addEventListener('sync', (event) => {
 
 async function doBackgroundSync() {
   // Implement background sync logic here
-  console.log('Performing background sync...');
 }
 
 // Push notifications (for future use)
 self.addEventListener('push', (event) => {
   if (event.data) {
     const data = event.data.json();
-    console.log('Push notification received:', data);
     
     const options = {
       body: data.body || 'New trading notification',
@@ -174,7 +164,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click handler
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification clicked:', event.notification);
   
   event.notification.close();
   

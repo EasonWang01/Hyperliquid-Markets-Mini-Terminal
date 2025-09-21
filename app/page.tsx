@@ -26,7 +26,6 @@ export default function Home() {
     setError
   } = useTradingStore();
 
-  // Load markets once on app start
   useEffect(() => {
     const loadMarkets = async () => {
       if (markets.length > 0) return; // Already loaded
@@ -36,7 +35,6 @@ export default function Home() {
         const fetchedMarkets = await hyperliquidAPI.fetchMarkets();
         setMarkets(fetchedMarkets);
 
-        // Auto-select first market if none selected
         if (!selectedMarket && fetchedMarkets.length > 0) {
           setSelectedMarket(fetchedMarkets[0]);
         }
@@ -51,7 +49,6 @@ export default function Home() {
     loadMarkets();
   }, [markets.length, selectedMarket, setMarkets, setSelectedMarket, setLoading, setError]);
 
-  // Clear error after 5 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => clearError(), 5000);
@@ -59,7 +56,6 @@ export default function Home() {
     }
   }, [error, clearError]);
 
-  // Filter markets based on search term
   const filteredMarkets = useMemo(() => {
     if (!searchTerm.trim()) return markets.slice(0, 10); // Show first 10 by default
 
@@ -70,21 +66,18 @@ export default function Home() {
     ).slice(0, 10);
   }, [markets, searchTerm]);
 
-  // Handle search input changes
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
     setShowSearchResults(value.trim().length > 0);
   };
 
-  // Handle market selection from search results
   const handleMarketSelect = (market: any) => {
     setSelectedMarket(market);
     setSearchTerm('');
     setShowSearchResults(false);
   };
 
-  // Toggle favorite
   const toggleFavorite = (coin: string) => {
     setFavorites(prev => {
       const newFavorites = new Set(prev);
@@ -97,7 +90,6 @@ export default function Home() {
     });
   };
 
-  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -114,9 +106,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-900">
-      {/* Header */}
       <header className="trading-header">
-        {/* Market Select Control */}
         <div className="market-select-section">
           <div className="market-select-wrapper">
             <div className="market-select-button">
@@ -149,7 +139,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Searchable Market List */}
           <div className="market-search-wrapper">
             <div>
               <input
@@ -158,11 +147,9 @@ export default function Home() {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onFocus={() => setShowSearchResults(searchTerm.trim().length > 0)}
-                className="market-search-input"
               />
             </div>
 
-            {/* Search Results Dropdown */}
             {showSearchResults && (
               <div className="market-search-results">
                 <div className="search-results-header">
@@ -176,7 +163,7 @@ export default function Home() {
                     onClick={() => handleMarketSelect(market)}
                     className="market-search-item"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -202,7 +189,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Error Banner */}
       {error && (
         <div className="bg-red-600 text-white p-3 text-center">
           <p className="text-sm">{error}</p>
@@ -210,24 +196,15 @@ export default function Home() {
       )}
 
       <div className="container mx-auto p-4 max-w-7xl">
-        {/*
-          Unified Layout:
-          - Mobile: Tabs control visibility of OrderBook and TradesList. Chart is always present but hidden by the tab content.
-          - Desktop: Grid layout places Chart, OrderBook, and TradesList side-by-side.
-        */}
         <div className="grid grid-cols-12 gap-4">
-          {/* Main Content Area (Chart) */}
           <PriceChart height={400} />
 
-          {/* Sidebar Content Area (OrderBook & Trades) */}
           <div className="col-span-12 lg:col-span-4 space-y-4">
             <OrderBook />
             <TradesList />
           </div>
         </div>
 
-
-        {/* PWA Install Prompt */}
         <div className="mt-8 p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-center">
           <h3 className="text-white font-semibold mb-2">
             Install Hyperliquid Terminal

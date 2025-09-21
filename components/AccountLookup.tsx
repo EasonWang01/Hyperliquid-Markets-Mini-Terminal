@@ -37,7 +37,6 @@ export default function AccountLookup({ isOpen, onClose }: AccountLookupProps) {
         },
         {
           onDecodeError: (error) => {
-            console.log('QR decode error:', error);
           },
           highlightScanRegion: true,
           highlightCodeOutline: true,

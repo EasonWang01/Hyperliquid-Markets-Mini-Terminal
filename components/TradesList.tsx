@@ -8,7 +8,6 @@ import { Trade } from '@/types/hyperliquid';
 
 export default function TradesList() {
   const [maxTrades, setMaxTrades] = useState(30);
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 
   const {
     selectedMarket,
@@ -18,11 +17,8 @@ export default function TradesList() {
     setError
   } = useTradingStore();
 
-  // Load trades when market changes and set up WebSocket subscription
   useEffect(() => {
-    console.log('TradesList useEffect triggered for market:', selectedMarket?.coin);
     if (!selectedMarket) {
-      console.log('TradesList: No selected market, skipping subscription');
       return;
     }
 
@@ -30,7 +26,6 @@ export default function TradesList() {
       setLoading(true);
       try {
         const tradesData = await hyperliquidAPI.fetchTrades(selectedMarket.coin);
-        // Add trades individually to avoid setTrades dependency
         tradesData.forEach(trade => addTrade(trade));
       } catch (error) {
         console.error('Failed to load trades:', error);
@@ -40,45 +35,31 @@ export default function TradesList() {
       }
     };
 
-    // Load initial data
     loadTrades();
 
-    // Set up WebSocket subscription for real-time updates
     const handleTradeUpdate = (data: any) => {
-      console.log('Trade update received:', data);
       if (data && Array.isArray(data)) {
-        // Add new trades to the list (most recent first)
         data.forEach(trade => {
           if (trade.coin === selectedMarket.coin) {
             addTrade(trade);
-            setLastUpdateTime(Date.now());
-            console.log('Added new trade:', trade);
           }
         });
       } else if (data && data.coin === selectedMarket.coin) {
-        // Single trade update
         addTrade(data);
-        setLastUpdateTime(Date.now());
-        console.log('Added single trade:', data);
       }
     };
 
-    // Subscribe to real-time trade updates
     const subscribeToTrades = async () => {
       try {
         await hyperliquidAPI.subscribeToTrades(selectedMarket.coin, handleTradeUpdate);
-        console.log(`Subscribed to real-time trades for ${selectedMarket.coin}`);
       } catch (error) {
         console.error('Failed to subscribe to trades:', error);
-        // Fallback to polling if WebSocket fails
         const interval = setInterval(loadTrades, 15000);
         return () => clearInterval(interval);
       }
     };
 
-    // Add a small delay to ensure WebSocket connection is ready
     const subscriptionTimeout = setTimeout(() => {
-      console.log('Starting trades subscription after delay...');
       subscribeToTrades();
     }, 200);
 
@@ -252,7 +233,6 @@ function TradeRow({ trade, decimals }: TradeRowProps) {
   );
 }
 
-// Real-time trade animation component
 export function TradeFlash({ trade }: { trade: Trade }) {
   const [show, setShow] = useState(true);
 

@@ -9,7 +9,6 @@ import { OrderBookLevel } from '@/types/hyperliquid';
 export default function OrderBook() {
   const [showSettings, setShowSettings] = useState(false);
   const [maxLevels, setMaxLevels] = useState(10);
-  const [lastUpdateTime, setLastUpdateTime] = useState<number>(Date.now());
 
   const {
     selectedMarket,
@@ -21,11 +20,8 @@ export default function OrderBook() {
     setError
   } = useTradingStore();
 
-  // Load order book when market changes and set up WebSocket subscription
   useEffect(() => {
-    console.log('OrderBook useEffect triggered for market:', selectedMarket?.coin);
     if (!selectedMarket) {
-      console.log('OrderBook: No selected market, skipping subscription');
       return;
     }
 
@@ -42,40 +38,29 @@ export default function OrderBook() {
       }
     };
 
-    // Load initial data
     loadOrderBook();
 
-    // Set up WebSocket subscription for real-time updates
     const handleOrderBookUpdate = (data: any) => {
-      console.log('Order book update received:', data);
       if (data && data.levels && data.coin === selectedMarket.coin) {
-        // Update the order book with real-time data
         setOrderBook({
           coin: data.coin,
           levels: data.levels, // [bids, asks] array
           time: data.time || Date.now()
         });
-        setLastUpdateTime(Date.now());
-        console.log('Order book updated with real-time data');
       }
     };
 
-    // Subscribe to real-time order book updates
     const subscribeToOrderBook = async () => {
       try {
         await hyperliquidAPI.subscribeToOrderBook(selectedMarket.coin, handleOrderBookUpdate);
-        console.log(`Subscribed to real-time order book for ${selectedMarket.coin}`);
       } catch (error) {
         console.error('Failed to subscribe to order book:', error);
-        // Fallback to polling if WebSocket fails
         const interval = setInterval(loadOrderBook, 10000);
         return () => clearInterval(interval);
       }
     };
 
-    // Add a small delay to ensure WebSocket connection is ready
     const subscriptionTimeout = setTimeout(() => {
-      console.log('Starting order book subscription after delay...');
       subscribeToOrderBook();
     }, 200);
 
@@ -87,7 +72,6 @@ export default function OrderBook() {
     };
   }, [selectedMarket, setOrderBook, setLoading, setError]);
 
-  // Aggregate order book levels based on aggregation setting
   const aggregatedOrderBook = useMemo(() => {
     if (!orderBook || orderBookAggregation === 0) return orderBook;
 
@@ -98,7 +82,6 @@ export default function OrderBook() {
         const price = parseFloat(level.px);
         const size = parseFloat(level.sz);
         
-        // Round price to aggregation level
         const roundedPrice = Math.floor(price / orderBookAggregation) * orderBookAggregation;
         const priceKey = roundedPrice.toFixed(8);
 
@@ -136,19 +119,7 @@ export default function OrderBook() {
   const bids = aggregatedOrderBook?.levels[0]?.slice(0, maxLevels).sort((a, b) => parseFloat(b.px) - parseFloat(a.px)) || [];
   const asks = aggregatedOrderBook?.levels[1]?.slice(0, maxLevels).sort((a, b) => parseFloat(a.px) - parseFloat(b.px)) || [];
   
-  // Debug: Check if we're getting different data for bids vs asks
-  console.log('OrderBook Data Check:', {
-    hasOrderBook: !!orderBook,
-    levelsLength: orderBook?.levels?.length,
-    level0Length: orderBook?.levels?.[0]?.length,
-    level1Length: orderBook?.levels?.[1]?.length,
-    bidsLength: bids.length,
-    asksLength: asks.length,
-    firstBid: bids[0],
-    firstAsk: asks[0]
-  });
 
-  // Calculate totals for depth visualization
   const bidTotals = useMemo(() => {
     let total = 0;
     return bids.map(bid => {
@@ -174,7 +145,6 @@ export default function OrderBook() {
 
   return (
     <div className="order-book-container">
-      {/* Header */}
       <div className="order-book-header">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -185,7 +155,6 @@ export default function OrderBook() {
             </div>
           </div>
           <div className="order-book-controls">
-            {/* Aggregation Selector */}
             <select
               value={orderBookAggregation}
               onChange={(e) => setOrderBookAggregation(parseFloat(e.target.value))}
@@ -206,7 +175,6 @@ export default function OrderBook() {
           </div>
         </div>
 
-        {/* Settings Panel */}
         {showSettings && (
           <div className="order-book-settings-panel">
             <div className="space-y-3">
@@ -228,7 +196,6 @@ export default function OrderBook() {
         )}
       </div>
 
-      {/* Order Book Data */}
       <div className="order-book-content">
         {!selectedMarket ? (
           <div className="order-book-empty">
@@ -241,7 +208,6 @@ export default function OrderBook() {
           </div>
         ) : (
           <div className="order-book-layout">
-            {/* Bids (Left Side) - Green */}
             <div className="order-book-column">
               <div className="order-book-header-row">
                 <span className="text-left">Total ({selectedMarket.coin})</span>
@@ -270,7 +236,6 @@ export default function OrderBook() {
               </div>
             </div>
 
-            {/* Asks (Right Side) - Red */}
             <div className="order-book-column">
               <div className="order-book-header-row">
                 <span className="text-left">Price</span>
@@ -317,13 +282,11 @@ interface BidRowProps {
 function BidRow({ price, size, total, depthPercent, decimals, isBestBid = false }: BidRowProps) {
   return (
     <div className={`bid-row ${isBestBid ? 'best-bid' : ''}`}>
-      {/* Depth visualization - green bars extending left */}
       <div
         className="bid-depth-bar"
         style={{ width: `${depthPercent}%` }}
       />
       
-      {/* Row content */}
       <div className="bid-row-content">
         <span className={`bid-text ${isBestBid ? 'best-bid' : ''}`}>
           {total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -348,13 +311,11 @@ interface AskRowProps {
 function AskRow({ price, size, total, depthPercent, decimals, isBestAsk = false }: AskRowProps) {
   return (
     <div className={`ask-row ${isBestAsk ? 'best-ask' : ''}`}>
-      {/* Depth visualization - red bars extending right */}
       <div
         className="ask-depth-bar"
         style={{ width: `${depthPercent}%` }}
       />
       
-      {/* Row content */}
       <div className="ask-row-content">
         <span className={`ask-price ${isBestAsk ? 'best-ask' : ''}`}>
           {parseFloat(price).toFixed(3)}
