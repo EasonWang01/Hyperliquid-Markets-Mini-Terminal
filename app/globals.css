@@ -280,6 +280,15 @@ input:focus, select:focus, textarea:focus {
   color: #4ade80;
 }
 
+.trades-update-indicator.offline .update-dot {
+  background-color: #6b7280;
+  animation: none;
+}
+
+.trades-update-indicator.offline .update-text {
+  color: #6b7280;
+}
+
 .order-book-content {
   padding: 16px;
 }
@@ -1327,6 +1336,7 @@ input:focus, select:focus, textarea:focus {
 /* Chart Controls Layout */
 .chart-controls {
   display: flex;
+  gap: 15px;
   justify-content: space-between;
   align-items: flex-start;
   padding: 16px 20px;

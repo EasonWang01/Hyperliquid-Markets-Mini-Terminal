@@ -18,6 +18,7 @@ const PriceChart = memo(function PriceChart({ height = 300 }: PriceChartProps) {
   const [timeframe, setTimeframe] = useState('1m');
   const [isChartReady, setIsChartReady] = useState(false);
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
 
   const {
     selectedMarket,
@@ -32,6 +33,21 @@ const PriceChart = memo(function PriceChart({ height = 300 }: PriceChartProps) {
     currentPrice - chartData[chartData.length - 2].close : 0;
   const priceChangePercent = chartData.length > 1 && currentPrice && chartData[chartData.length - 2].close > 0 ?
     ((priceChange / chartData[chartData.length - 2].close) * 100) : 0;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedMarket || !chartContainerRef.current) {
@@ -365,9 +381,9 @@ const PriceChart = memo(function PriceChart({ height = 300 }: PriceChartProps) {
         </div>
 
         <div className="timeframe-controls">
-          <button className={`live-button ${isWebSocketConnected ? 'live' : 'offline'}`}>
+          <button className={`live-button ${isOnline && isWebSocketConnected ? 'live' : 'offline'}`}>
             <div className="live-dot"></div>
-            <span>Live</span>
+            <span>{isOnline ? 'Live' : 'Offline'}</span>
           </button>
           
           {timeframes.map((tf) => (

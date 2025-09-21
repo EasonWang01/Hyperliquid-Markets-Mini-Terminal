@@ -8,6 +8,7 @@ import { Trade } from '@/types/hyperliquid';
 
 const TradesList = memo(function TradesList() {
   const [maxTrades, setMaxTrades] = useState(30);
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true);
 
   const {
     selectedMarket,
@@ -16,6 +17,21 @@ const TradesList = memo(function TradesList() {
     setLoading,
     setError
   } = useTradingStore();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedMarket) {
@@ -100,9 +116,9 @@ const TradesList = memo(function TradesList() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="trades-title">Recent Trades</h2>
-            <div className="trades-update-indicator">
+            <div className={`trades-update-indicator ${!isOnline ? 'offline' : ''}`}>
               <div className="update-dot"></div>
-              <span className="update-text">Live</span>
+              <span className="update-text">{isOnline ? 'Live' : 'Offline'}</span>
             </div>
           </div>
           <div className="trades-controls">
