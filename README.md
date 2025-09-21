@@ -11,7 +11,8 @@ A mobile-first Progressive Web App (PWA) UI terminal for Hyperliquid. Built with
 <img width="349" height="615" alt="截圖 2025-09-21 下午3 28 05" src="https://github.com/user-attachments/assets/6975e0de-6ccb-4e02-82ba-e9a1b9a410c8" />
 <img width="383" height="600" alt="截圖 2025-09-21 下午3 28 12" src="https://github.com/user-attachments/assets/97f7f8bc-425a-41e6-84fc-9b1e501d801b" />
 <img width="372" height="541" alt="截圖 2025-09-21 下午3 28 18" src="https://github.com/user-attachments/assets/04caa1e1-ccb9-4192-be3d-8e83e02c9332" />
-<img width="615" height="690" alt="截圖 2025-09-21 下午3 29 48" src="https://github.com/user-attachments/assets/e6849ed0-1df8-4788-830f-f1dd4b4adb4c" />
+<img width="349" height="566" alt="截圖 2025-09-21 下午3 30 45" src="https://github.com/user-attachments/assets/a23b70d9-1ed2-4a3b-8b39-611f9d92f794" />
+
 
 
 
