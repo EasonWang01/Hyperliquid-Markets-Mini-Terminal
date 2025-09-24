@@ -17,7 +17,7 @@ A mobile-first Progressive Web App (PWA) UI terminal for Hyperliquid. Built with
 
 
 ## Demo
-https://trade-mini-terminal-idft4corw.vercel.app/
+[https://trade-mini-terminal.vercel.app/](https://trade-mini-terminal.vercel.app/)
 
 ## ✨ Features
 
